@@ -7,14 +7,15 @@ import java.util.Random;
 public abstract class Animal {
     public static int animalCount = 0;
 
+    private int x_Coordinate, y_Coordinate;
     private int energy;
-    private String symbol;
-    private char sex;
+    private String icon;
+    private final char sex;
     private String name;
 
     public Animal(int initialEnergy){
         this.energy = initialEnergy;
-
+        this.sex = new Random().nextBoolean() ? 'F' : 'M';
         animalCount++;
     }
 
@@ -41,6 +42,21 @@ public abstract class Animal {
 
     public char getSex(){return sex;}
 
-    public String getSymbol(){return symbol;}
+    public String getIcon(){return icon;}
 
+    public int getX_Coordinate() {
+        return x_Coordinate;
+    }
+
+    public void setX_Coordinate(int x_Coordinate) {
+        this.x_Coordinate = x_Coordinate;
+    }
+
+    public int getY_Coordinate() {
+        return y_Coordinate;
+    }
+
+    public void setY_Coordinate(int y_Coordinate) {
+        this.y_Coordinate = y_Coordinate;
+    }
 }

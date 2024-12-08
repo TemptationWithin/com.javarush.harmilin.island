@@ -10,11 +10,11 @@ public class Bear extends Predator{
 
     @Override
     public void reproduce() {
-        System.out.println(getSymbol() + " gave birth.");
+        System.out.println(getIcon() + " gave birth.");
     }
 
     @Override
-    public String getSymbol() {
+    public String getIcon() {
         return "🐻";
     }
 }

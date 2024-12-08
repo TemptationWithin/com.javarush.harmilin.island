@@ -1,34 +1,25 @@
 package entity.cell;
-
-import entity.animal.Animal;
-import entity.animal.herbivores.Herbivore;
-import entity.animal.predators.Predator;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Cell {
-    private final int x, y;
-    private final List<Animal> animalList = new ArrayList<>();
+    private final Set<String> icons = new HashSet<>();
 
-    public Cell(int x, int y){
-        this.x = x;
-        this.y = y;
-    }
 
-    public void addAnimal(Animal animal){
-        synchronized (animalList){
-            animalList.add(animal);
+    public void addIcon(String icon){
+        synchronized (icons){
+            icons.add(icon);
         }
     }
 
-    public String getSymbols(){
-        synchronized (animalList){
-            boolean hasHerbivores = animalList.stream().allMatch(animal -> animal instanceof Herbivore);
-            boolean hasPredators = animalList.stream().allMatch(animal -> animal instanceof Predator);
-            if (hasPredators){
-            }
-            return null;
+    public boolean isEmpty(){
+        return icons.isEmpty();
+    }
+
+    public String getFormattedContent(){
+        if (isEmpty()){
+            return "";
         }
+        return String.join(" ", icons);
     }
 }

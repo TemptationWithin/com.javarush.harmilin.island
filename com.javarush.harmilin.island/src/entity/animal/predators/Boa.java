@@ -10,11 +10,11 @@ public class Boa extends Predator{
 
     @Override
     public void reproduce() {
-        System.out.println(getSymbol() + " laid eggs.");
+        System.out.println(getIcon() + " laid eggs.");
     }
 
     @Override
-    public String getSymbol() {
+    public String getIcon() {
         return "🐍";
     }
 }

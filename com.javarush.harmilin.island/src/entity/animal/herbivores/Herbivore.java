@@ -14,13 +14,13 @@ public abstract class Herbivore extends Animal {
     @Override
     public void eat(Object food) {
         if  (food instanceof Plant){
-            System.out.println(getSymbol() + " ate plant.");
+            System.out.println(getIcon() + " ate plant.");
             increaseEnergy(10);
         } else if (this instanceof Duck && food instanceof Caterpillar){
-            System.out.println(getSymbol() + " ate caterpillar.");
+            System.out.println(getIcon() + " ate caterpillar.");
             increaseEnergy(15);
         } else {
-            System.out.println(getSymbol() + " can't eat that.");
+            System.out.println(getIcon() + " can't eat that.");
         }
     }
 }

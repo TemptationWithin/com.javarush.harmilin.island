@@ -14,10 +14,10 @@ public abstract class Predator extends Animal {
     @Override
     public void eat(Object food) {
         if (food instanceof Herbivore){
-            System.out.println(getSymbol() + " ate " + (((Herbivore) food).getSymbol()) + ".");
+            System.out.println(getIcon() + " ate " + (((Herbivore) food).getIcon()) + ".");
             increaseEnergy(20);
         } else {
-            System.out.println(getSymbol() + " can't eat this.");
+            System.out.println(getIcon() + " can't eat this.");
         }
     }
 

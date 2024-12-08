@@ -10,10 +10,10 @@ public class Validator {
             System.out.println(message);
             if (scanner.hasNextInt()){
                 size = scanner.nextInt();
-                if (size > 19){
+                if (size > 0){
                     return size;
                 } else {
-                    System.out.println("Please, enter int > 19:");
+                    System.out.println("Please, enter int:");
                 }
             } else {
                 System.out.println("Please, enter int:");
