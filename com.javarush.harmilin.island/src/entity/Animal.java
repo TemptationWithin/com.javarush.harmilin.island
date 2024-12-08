@@ -1,5 +1,4 @@
 package entity;
-import lombok.Data;
 import lombok.Getter;
 
 import java.util.Random;
@@ -29,5 +28,13 @@ public abstract class Animal {
         String[] directions = {"Up", "Down", "Left", "Right"};
         String direction = directions[new Random().nextInt(directions.length)];
         decreaseEnergy(5);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getEnergy() {
+        return energy;
     }
 }
