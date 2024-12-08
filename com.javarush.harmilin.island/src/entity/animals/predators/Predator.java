@@ -4,9 +4,11 @@ import entity.animals.Animal;
 import entity.animals.herbivores.Herbivore;
 
 public abstract class Predator extends Animal {
+    public static int predatorCount = 0;
 
     public Predator(String name, int initialEnergy){
         super(name, initialEnergy);
+        predatorCount++;
     }
 
     @Override

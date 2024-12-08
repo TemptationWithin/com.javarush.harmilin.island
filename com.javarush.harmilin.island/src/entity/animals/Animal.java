@@ -5,12 +5,15 @@ import java.util.Random;
 
 @Getter
 public abstract class Animal {
+    public static int animalCount = 0;
+
     private String name;
     private int energy;
 
     public Animal(String name, int initialEnergy){
         this.name = name;
         this.energy = initialEnergy;
+        animalCount++;
     }
 
     public abstract void eat(Object food);
