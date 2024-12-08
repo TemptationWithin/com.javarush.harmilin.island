@@ -1,4 +1,4 @@
-package entity.animals;
+package entity.animal;
 import lombok.Getter;
 
 import java.util.Random;
@@ -7,12 +7,14 @@ import java.util.Random;
 public abstract class Animal {
     public static int animalCount = 0;
 
-    private String name;
     private int energy;
+    private String symbol;
+    private char sex;
+    private String name;
 
-    public Animal(String name, int initialEnergy){
-        this.name = name;
+    public Animal(int initialEnergy){
         this.energy = initialEnergy;
+
         animalCount++;
     }
 
@@ -33,12 +35,12 @@ public abstract class Animal {
         decreaseEnergy(5);
     }
 
-    public String getName() {
-        return name;
-    }
-
     public int getEnergy() {
         return energy;
     }
+
+    public char getSex(){return sex;}
+
+    public String getSymbol(){return symbol;}
 
 }
