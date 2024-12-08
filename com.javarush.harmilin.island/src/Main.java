@@ -10,5 +10,4 @@ public class Main {
         int length = Validator.getValidatedInput(console, "Please, select length of island: ");
         System.out.println("Thank you.\nIsland size will be: " + width + " x " + length);
     }
-
 }

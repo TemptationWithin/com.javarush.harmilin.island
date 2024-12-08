@@ -37,4 +37,5 @@ public abstract class Animal {
     public int getEnergy() {
         return energy;
     }
+
 }

@@ -19,7 +19,6 @@ public class Validator {
                 System.out.println("Please, enter int:");
                 scanner.next();
             }
-
         }
     }
 }

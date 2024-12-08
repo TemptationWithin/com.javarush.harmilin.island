@@ -15,4 +15,5 @@ public abstract class Predator extends Animal{
             System.out.println(getName() + " can't eat this.");
         }
     }
+
 }
