@@ -1,6 +1,9 @@
-package entity;
+package entity.animals.predators;
 
-public abstract class Predator extends Animal{
+import entity.animals.Animal;
+import entity.animals.herbivores.Herbivore;
+
+public abstract class Predator extends Animal {
 
     public Predator(String name, int initialEnergy){
         super(name, initialEnergy);

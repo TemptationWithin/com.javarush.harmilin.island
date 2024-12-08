@@ -1,4 +1,4 @@
-package entity;
+package entity.animals;
 import lombok.Getter;
 
 import java.util.Random;
