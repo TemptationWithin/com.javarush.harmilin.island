@@ -7,13 +7,19 @@ import java.util.Random;
 public abstract class Animal {
     public static int animalCount = 0;
 
+    private int maxSpeed;
+    private double maxWeight;
+    private double foodRequired;
     private int x_Coordinate, y_Coordinate;
     private int energy;
     private String icon;
     private final char sex;
     private String name;
 
-    public Animal(int initialEnergy){
+    public Animal(double maxWeight, int maxSpeed, double foodRequired, int initialEnergy){
+        this.maxWeight = maxWeight;
+        this.maxSpeed = maxSpeed;
+        this.foodRequired = foodRequired;
         this.energy = initialEnergy;
         this.sex = new Random().nextBoolean() ? 'F' : 'M';
         animalCount++;

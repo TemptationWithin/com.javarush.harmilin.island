@@ -3,8 +3,8 @@ package entity.animal.herbivores;
 public class Mouse extends Herbivore{
     public static int mouseCount = 0;
 
-    public Mouse(int initialEnergy) {
-        super(initialEnergy);
+    public Mouse() {
+        super(0.05, 1, 0.01, 100);
         mouseCount++;
     }
 

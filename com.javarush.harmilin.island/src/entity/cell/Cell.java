@@ -1,5 +1,4 @@
 package entity.cell;
-import entity.animal.Animal;
 
 import java.util.HashMap;
 import java.util.HashSet;

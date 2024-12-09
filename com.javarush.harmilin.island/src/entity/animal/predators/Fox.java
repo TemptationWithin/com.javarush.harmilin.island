@@ -3,8 +3,8 @@ package entity.animal.predators;
 public class Fox extends Predator{
     public static int foxCount = 0;
 
-    public Fox(int initialEnergy) {
-        super(initialEnergy);
+    public Fox() {
+        super(8, 2, 2, 100);
         foxCount++;
     }
 

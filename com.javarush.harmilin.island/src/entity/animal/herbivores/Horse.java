@@ -3,8 +3,8 @@ package entity.animal.herbivores;
 public class Horse extends Herbivore{
     public static int horseCount = 0;
 
-    public Horse(int initialEnergy) {
-        super(initialEnergy);
+    public Horse() {
+        super(400, 4, 60, 100);
         horseCount++;
     }
 

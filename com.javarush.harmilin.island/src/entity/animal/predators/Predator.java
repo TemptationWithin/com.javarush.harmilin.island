@@ -6,8 +6,8 @@ import entity.animal.herbivores.Herbivore;
 public abstract class Predator extends Animal {
     public static int predatorCount = 0;
 
-    public Predator(int initialEnergy){
-        super(initialEnergy);
+    public Predator(double maxWeight, int maxSpeed, double foodRequired, int initialEnergy){
+        super(maxWeight, maxSpeed, foodRequired, initialEnergy);
         predatorCount++;
     }
 

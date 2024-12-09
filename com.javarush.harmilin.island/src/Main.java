@@ -17,21 +17,21 @@ public class Main {
         System.out.println("Thank you.\nIsland size will be: " + width + " x " + length);
 
         Island island = new Island(width, length);
-        island.placeAnimal(new Boar(100));
-        island.placeAnimal(new Buffalo(100));
-        island.placeAnimal(new Caterpillar(100));
-        island.placeAnimal(new Deer(100));
-        island.placeAnimal(new Duck(100));
-        island.placeAnimal(new Goat(100));
-        island.placeAnimal(new Horse(100));
-        island.placeAnimal(new Mouse(100));
-        island.placeAnimal(new Rabbit(100));
-        island.placeAnimal(new Sheep(100));
-        island.placeAnimal(new Bear(100));
-        island.placeAnimal(new Boa(100));
-        island.placeAnimal(new Eagle(100));
-        island.placeAnimal(new Fox(100));
-        island.placeAnimal(new Wolf(100));
+        island.placeAnimal(new Boar());
+        island.placeAnimal(new Buffalo());
+        island.placeAnimal(new Caterpillar());
+        island.placeAnimal(new Deer());
+        island.placeAnimal(new Duck());
+        island.placeAnimal(new Goat());
+        island.placeAnimal(new Horse());
+        island.placeAnimal(new Mouse());
+        island.placeAnimal(new Rabbit());
+        island.placeAnimal(new Sheep());
+        island.placeAnimal(new Bear());
+        island.placeAnimal(new Boa());
+        island.placeAnimal(new Eagle());
+        island.placeAnimal(new Fox());
+        island.placeAnimal(new Wolf());
         island.placePlant(new Plant());
         island.display();
 
