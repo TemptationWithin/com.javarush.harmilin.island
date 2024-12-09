@@ -4,24 +4,33 @@ import entity.animal.Animal;
 import entity.cell.Cell;
 import entity.plant.Plant;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class Island {
     private final int rows;
     private final int cols;
     private final Cell[][] grid;
+    private final Map<String, Integer> animalLimits = new HashMap<>();
+
+    public Map<String, Integer> getAnimalLimits() {
+        return animalLimits;
+    }
+
 
     public Island(int rows, int cols){
         this.rows = rows;
         this.cols = cols;
         this.grid = new Cell[rows][cols];
         initializeGrid();
+        setAnimalLimits();
     }
 
     private void initializeGrid(){
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                grid[i][j] = new Cell();
+                grid[i][j] = new Cell(animalLimits);
             }
         }
     }
@@ -66,5 +75,24 @@ public class Island {
             System.out.println(rowContent);
             System.out.println(horizontalBorder);
         }
+    }
+
+    private void setAnimalLimits(){
+        animalLimits.put("Boar", 50);
+        animalLimits.put("Buffalo", 10);
+        animalLimits.put("Caterpillar", 1000);
+        animalLimits.put("Deer", 20);
+        animalLimits.put("Duck", 100);
+        animalLimits.put("Goat", 150);
+        animalLimits.put("Horse", 20);
+        animalLimits.put("Mouse", 500);
+        animalLimits.put("Rabbit", 150);
+        animalLimits.put("Sheep", 140);
+        animalLimits.put("Bear", 5);
+        animalLimits.put("Boa", 30);
+        animalLimits.put("Eagle", 20);
+        animalLimits.put("Fox", 30);
+        animalLimits.put("Wolf", 30);
+        animalLimits.put("Plant", 200);
     }
 }
