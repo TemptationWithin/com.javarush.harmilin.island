@@ -2,6 +2,13 @@ package entity.animal.predators;
 
 import entity.animal.Animal;
 import entity.animal.herbivores.Herbivore;
+import entity.cell.Cell;
+
+import javax.lang.model.element.AnnotationMirror;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public abstract class Predator extends Animal {
     public static int predatorCount = 0;
@@ -9,16 +16,6 @@ public abstract class Predator extends Animal {
     public Predator(double maxWeight, int maxSpeed, double foodRequired, int initialEnergy){
         super(maxWeight, maxSpeed, foodRequired, initialEnergy);
         predatorCount++;
-    }
-
-    @Override
-    public void eat(Object food) {
-        if (food instanceof Herbivore){
-            System.out.println(getIcon() + " ate " + (((Herbivore) food).getIcon()) + ".");
-            increaseEnergy(20);
-        } else {
-            System.out.println(getIcon() + " can't eat this.");
-        }
     }
 
 }

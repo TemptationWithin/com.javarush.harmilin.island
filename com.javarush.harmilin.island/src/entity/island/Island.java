@@ -4,20 +4,17 @@ import entity.animal.Animal;
 import entity.cell.Cell;
 import entity.plant.Plant;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Island {
     private final int rows;
     private final int cols;
     private final Cell[][] grid;
+    private final List<Animal> animals = new ArrayList<>();
     private final Map<String, Integer> animalLimits = new HashMap<>();
-
-    public Map<String, Integer> getAnimalLimits() {
-        return animalLimits;
-    }
-
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     public Island(int rows, int cols){
         this.rows = rows;
@@ -30,7 +27,7 @@ public class Island {
     private void initializeGrid(){
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                grid[i][j] = new Cell(animalLimits);
+                grid[i][j] = new Cell();
             }
         }
     }
@@ -76,7 +73,9 @@ public class Island {
             System.out.println(horizontalBorder);
         }
     }
-
+    public Map<String, Integer> getAnimalLimits() {
+        return animalLimits;
+    }
     private void setAnimalLimits(){
         animalLimits.put("Boar", 50);
         animalLimits.put("Buffalo", 10);
@@ -94,5 +93,12 @@ public class Island {
         animalLimits.put("Fox", 30);
         animalLimits.put("Wolf", 30);
         animalLimits.put("Plant", 200);
+    }
+
+    public void stopSimulation(){
+        for (Animal animal : animals){
+            animal.die();
+        }
+        executorService.shutdown();
     }
 }

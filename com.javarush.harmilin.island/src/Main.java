@@ -5,6 +5,7 @@ import entity.island.Island;
 import entity.plant.Plant;
 import handler.Validator;
 
+import javax.swing.plaf.TableHeaderUI;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -35,10 +36,16 @@ public class Main {
         island.placePlant(new Plant());
         island.display();
 
-
         System.out.println("Animals: " + Animal.animalCount);
         System.out.println("Predators: " + Predator.predatorCount);
         System.out.println("Herbivores: " + Herbivore.herbivoreCount);
 
+        try{
+            Thread.sleep(10000);
+        } catch (InterruptedException e){
+            Thread.currentThread().interrupt();
+        }
+        island.stopSimulation();
+        System.out.println("Simulation stopped.");
     }
 }

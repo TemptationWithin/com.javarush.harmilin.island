@@ -5,6 +5,7 @@ public class Duck extends Herbivore{
 
     public Duck() {
         super(1, 4, 0.15, 100);
+        setPreyChance(Caterpillar.class, 90);
         duckCount++;
     }
 
