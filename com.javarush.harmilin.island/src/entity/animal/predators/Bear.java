@@ -22,11 +22,6 @@ public class Bear extends Predator{
     }
 
     @Override
-    public void reproduce() {
-        System.out.println(getIcon() + " gave birth.");
-    }
-
-    @Override
     public String getIcon() {
         return "🐻";
     }

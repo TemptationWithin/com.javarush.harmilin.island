@@ -11,11 +11,6 @@ public class Buffalo extends Herbivore{
     }
 
     @Override
-    public void reproduce() {
-        System.out.println(getIcon() + " gave birth.");
-    }
-
-    @Override
     public String getIcon() {
         return "🐃";
     }

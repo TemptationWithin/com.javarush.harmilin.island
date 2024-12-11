@@ -12,11 +12,6 @@ public class Duck extends Herbivore{
     }
 
     @Override
-    public void reproduce() {
-        System.out.println(getIcon() + " laid eggs.");
-    }
-
-    @Override
     public String getIcon() {
         return "🦆";
     }
