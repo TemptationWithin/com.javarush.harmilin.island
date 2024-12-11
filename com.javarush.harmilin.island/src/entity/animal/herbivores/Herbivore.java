@@ -1,11 +1,6 @@
 package entity.animal.herbivores;
 
 import entity.animal.Animal;
-import entity.cell.Cell;
-import entity.plant.Plant;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public abstract class Herbivore extends Animal {
     public static int herbivoreCount = 0;

@@ -1,12 +1,10 @@
 import entity.animal.Animal;
 import entity.animal.herbivores.*;
 import entity.animal.predators.*;
+import entity.cell.Cell;
 import entity.island.Island;
 import entity.plant.Plant;
 import handler.Validator;
-
-import javax.swing.plaf.TableHeaderUI;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
@@ -47,5 +45,8 @@ public class Main {
         }
         island.stopSimulation();
         System.out.println("Simulation stopped.");
+
+        Cell cell = new Cell();
+        System.out.println(cell.getLimits());
     }
 }

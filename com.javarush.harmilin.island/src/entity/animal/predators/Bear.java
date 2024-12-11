@@ -1,5 +1,6 @@
 package entity.animal.predators;
 
+import entity.animal.Animal;
 import entity.animal.herbivores.*;
 
 public class Bear extends Predator{
@@ -28,5 +29,10 @@ public class Bear extends Predator{
     @Override
     public String getIcon() {
         return "🐻";
+    }
+
+    @Override
+    protected Animal createOffspring() {
+        return new Bear();
     }
 }

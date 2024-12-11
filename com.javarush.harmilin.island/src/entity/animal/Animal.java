@@ -1,20 +1,19 @@
 package entity.animal;
 
-import entity.animal.herbivores.CanEatAnotherHerbivore;
 import entity.animal.herbivores.Herbivore;
-import entity.animal.predators.Predator;
 import entity.cell.Cell;
-import lombok.Getter;
+import entity.plant.Plant;
+import lombok.Data;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
-@Getter
-public abstract class Animal{
+@Data
+public abstract class Animal {
     public static int animalCount = 0;
-
     private final int maxSpeed;
     private final double maxWeight;
     private final double foodRequired;
@@ -26,7 +25,8 @@ public abstract class Animal{
     private boolean isAlive = true;
     private boolean isHungry = true;
     private Cell currentCell;
-    private final Map<Class<? extends Animal>, Integer> preyChances = new HashMap<>();
+
+    private final ConcurrentHashMap<Class<? extends Animal>, Integer> preyChances = new ConcurrentHashMap<>();
 
     public Animal(double maxWeight, int maxSpeed, double foodRequired, int initialEnergy) {
         this.maxWeight = maxWeight;
@@ -37,7 +37,7 @@ public abstract class Animal{
         animalCount++;
     }
 
-    protected void eat(){
+    protected void eat() {
         Cell cell = getCurrentCell();
         this.eatAnimals(cell);
         this.eatPlants(cell);
@@ -46,51 +46,78 @@ public abstract class Animal{
     protected void eatAnimals(Cell cell) {
         List<Animal> potentialPrey = cell.getAnimals();
         Random random = new Random();
-        for (Animal prey : potentialPrey){
-            if (prey == this) continue;
-            Integer chance = getPreyChances().get(prey.getClass());
-            if (chance != null && random.nextInt(100) < chance){
-                System.out.println(this.getIcon() + " successfully ate " + prey.getIcon());
-                cell.removeAnimal(prey);
-                isHungry = false;
-                return;
+        synchronized (cell) {
+            for (Animal prey : potentialPrey) {
+                if (prey == this) continue;
+                Integer chance = getPreyChances().get(prey.getClass());
+                if (chance != null && random.nextInt(100) < chance) {
+                    System.out.println(this.getIcon() + " successfully ate " + prey.getIcon());
+                    cell.removeAnimal(prey);
+                    isHungry = false;
+                    return;
+                }
             }
         }
         System.out.println(this.getIcon() + " found no prey to eat.");
     }
 
-    private  void eatPlants(Cell cell){
-        if ((this instanceof Herbivore) && isHungry()){
-            int availablePlants = cell.getPlants();
-            if (availablePlants > 0){
-                int foodConsumed = (int) Math.min(getFoodRequired(), availablePlants);
-                cell.consumePlants(foodConsumed);
-                System.out.println(this.getIcon() + " ate " + foodConsumed + " plants.");
-                isHungry = false;
-            } else {
-                System.out.println(this.getIcon() + " found no plants around.");
+    private void eatPlants(Cell cell) {
+        synchronized (cell) {
+            if ((this instanceof Herbivore) && isHungry()) {
+                List<Plant> plants = cell.getPlants();
+                if (!plants.isEmpty()) {
+                    System.out.println(this.getIcon() + " ate " + plants.get(0).getIcon());
+                    isHungry = false;
+                } else {
+                    System.out.println(this.getIcon() + " found no plants around.");
+                }
             }
         }
     }
 
-    public abstract void reproduce();
+    public void reproduce() {
+        Cell cell = getCurrentCell();
+        synchronized (cell) {
+            List<Animal> animalsInCell = cell.getAnimals();
+            for (Animal partner : animalsInCell) {
+                if (partner != this
+                        && partner.getClass() == this.getClass()
+                        && partner.getSex() != this.getSex()
+                        && partner.isAlive()
+                        && this.getEnergy() > 10
+                        && partner.getEnergy() > 10) {
+                    Animal offspring = createOffspring();
+                    if (offspring != null){
+                        cell.addAnimal(createOffspring());
+                        this.decreaseEnergy(10);
+                        partner.decreaseEnergy(10);
+                        System.out.println(this.getIcon() + "(" + this.sex + ")" + " reproduced with " + partner.getIcon() + "(" + partner.sex + ")");
+                    }
+                    return;
+                }
+            }
+            System.out.println(this.getIcon() + "(" + this.sex + ")" + " found no partner to reproduce.");
+        }
+    }
 
-    public boolean isAlive(){
+    protected abstract Animal createOffspring();
+
+    public boolean isAlive() {
         return isAlive;
     }
 
-    public boolean isHungry(){
+    public boolean isHungry() {
         return isHungry;
     }
 
-    public void die(){
+    public void die() {
         isAlive = false;
     }
 
-    protected void performActions(){
+    protected void performActions() {
         Random random = new Random();
         int action = random.nextInt(3);
-        switch (action){
+        switch (action) {
             case 0 -> eat();
             case 1 -> move();
             case 2 -> reproduce();
@@ -111,51 +138,8 @@ public abstract class Animal{
         decreaseEnergy(this.maxSpeed * 2);
     }
 
-    public void setPreyChance(Class<? extends Animal> preyClass, int chance){
+    public void setPreyChance(Class<? extends Animal> preyClass, int chance) {
         preyChances.put(preyClass, chance);
     }
 
-    public Map<Class<? extends Animal>, Integer> getPreyChances() {
-        return preyChances;
-    }
-
-    public int getEnergy() {
-        return energy;
-    }
-
-    public char getSex() {
-        return sex;
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public int getX_Coordinate() {
-        return x_Coordinate;
-    }
-
-    public void setX_Coordinate(int x_Coordinate) {
-        this.x_Coordinate = x_Coordinate;
-    }
-
-    public int getY_Coordinate() {
-        return y_Coordinate;
-    }
-
-    public void setY_Coordinate(int y_Coordinate) {
-        this.y_Coordinate = y_Coordinate;
-    }
-
-    public Cell getCurrentCell() {
-        return currentCell;
-    }
-
-    public void setCurrentCell(Cell currentCell) {
-        this.currentCell = currentCell;
-    }
-
-    public double getFoodRequired() {
-        return foodRequired;
-    }
 }

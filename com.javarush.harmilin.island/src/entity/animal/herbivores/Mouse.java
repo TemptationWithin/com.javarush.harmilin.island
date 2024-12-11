@@ -1,5 +1,7 @@
 package entity.animal.herbivores;
 
+import entity.animal.Animal;
+
 public class Mouse extends Herbivore{
     public static int mouseCount = 0;
 
@@ -17,5 +19,10 @@ public class Mouse extends Herbivore{
     @Override
     public String getIcon() {
         return "🐁";
+    }
+
+    @Override
+    protected Animal createOffspring() {
+        return new Mouse();
     }
 }

@@ -1,6 +1,7 @@
 package entity.animal.herbivores;
 
-import entity.plant.Plant;
+
+import entity.animal.Animal;
 
 public class Boar extends Herbivore{
     public static int boarCount = 0;
@@ -20,5 +21,10 @@ public class Boar extends Herbivore{
     @Override
     public String getIcon() {
         return "🐗";
+    }
+
+    @Override
+    protected Animal createOffspring() {
+        return new Boar();
     }
 }

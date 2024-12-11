@@ -1,7 +1,7 @@
 package entity.animal.predators;
 
+import entity.animal.Animal;
 import entity.animal.herbivores.*;
-import entity.plant.Plant;
 
 public class Wolf extends Predator{
     public static int wolfCount = 0;
@@ -28,5 +28,10 @@ public class Wolf extends Predator{
     @Override
     public String getIcon() {
         return "🐺";
+    }
+
+    @Override
+    protected Animal createOffspring() {
+        return new Wolf();
     }
 }
