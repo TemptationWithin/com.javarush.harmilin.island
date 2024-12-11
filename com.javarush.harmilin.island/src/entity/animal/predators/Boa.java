@@ -2,12 +2,13 @@ package entity.animal.predators;
 
 import entity.animal.Animal;
 import entity.animal.herbivores.*;
+import entity.island.Island;
 
 public class Boa extends Predator{
     public static int boaCount = 0;
 
-    public Boa() {
-        super(15, 1, 3, 100);
+    public Boa(Island island) {
+        super(island, 15, 1, 3, 100);
         setPreyChance(Fox.class, 15);
         setPreyChance(Rabbit.class, 20);
         setPreyChance(Mouse.class, 40);
@@ -22,6 +23,6 @@ public class Boa extends Predator{
 
     @Override
     protected Animal createOffspring() {
-        return new Boa();
+        return new Boa(getIsland());
     }
 }

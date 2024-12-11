@@ -1,5 +1,6 @@
 package entity.plant;
 
+import entity.island.Island;
 import lombok.Data;
 
 @Data
@@ -8,7 +9,7 @@ public class Plant {
     private String icon;
     private final int maxWeight = 1;
 
-    public Plant(){
+    public Plant(Island island){
     }
 
     public String grow(){

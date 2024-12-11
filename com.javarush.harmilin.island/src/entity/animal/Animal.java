@@ -2,12 +2,11 @@ package entity.animal;
 
 import entity.animal.herbivores.Herbivore;
 import entity.cell.Cell;
+import entity.island.Island;
 import entity.plant.Plant;
 import lombok.Data;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,10 +24,12 @@ public abstract class Animal {
     private boolean isAlive = true;
     private boolean isHungry = true;
     private Cell currentCell;
+    private Island island;
 
     private final ConcurrentHashMap<Class<? extends Animal>, Integer> preyChances = new ConcurrentHashMap<>();
 
-    public Animal(double maxWeight, int maxSpeed, double foodRequired, int initialEnergy) {
+    public Animal(Island island, double maxWeight, int maxSpeed, double foodRequired, int initialEnergy) {
+        this.island = island;
         this.maxWeight = maxWeight;
         this.maxSpeed = maxSpeed;
         this.foodRequired = foodRequired;
@@ -53,6 +54,7 @@ public abstract class Animal {
                 if (chance != null && random.nextInt(100) < chance) {
                     System.out.println(this.getIcon() + " successfully ate " + prey.getIcon());
                     cell.removeAnimal(prey);
+                    increaseEnergy(Math.min(100, getEnergy()+40));
                     isHungry = false;
                     return;
                 }
@@ -67,6 +69,7 @@ public abstract class Animal {
                 List<Plant> plants = cell.getPlants();
                 if (!plants.isEmpty()) {
                     System.out.println(this.getIcon() + " ate " + plants.get(0).getIcon());
+                    increaseEnergy(Math.min(100, getEnergy()+10));
                     isHungry = false;
                 } else {
                     System.out.println(this.getIcon() + " found no plants around.");
@@ -87,7 +90,7 @@ public abstract class Animal {
                         && this.getEnergy() > 10
                         && partner.getEnergy() > 10) {
                     Animal offspring = createOffspring();
-                    if (offspring != null){
+                    if (offspring != null) {
                         cell.addAnimal(createOffspring());
                         this.decreaseEnergy(10);
                         partner.decreaseEnergy(10);
@@ -119,7 +122,7 @@ public abstract class Animal {
         int action = random.nextInt(3);
         switch (action) {
             case 0 -> eat();
-            case 1 -> move();
+            case 1 -> move(island.getRows(), island.getCols());
             case 2 -> reproduce();
         }
     }
@@ -132,10 +135,37 @@ public abstract class Animal {
         energy = Math.max(0, energy - amount);
     }
 
-    public void move() {
-        String[] directions = {"Up", "Down", "Left", "Right"};
-        String direction = directions[new Random().nextInt(directions.length)];
-        decreaseEnergy(this.maxSpeed * 2);
+    public void move(int rows, int cols) {
+        Random random = new Random();
+        int moveDistance = random.nextInt(getMaxSpeed())+1;
+        int direction = random.nextInt(4);
+        switch (direction){
+            case 0:
+                if (x_Coordinate - moveDistance >= 0) {
+                    x_Coordinate -= moveDistance;
+                }
+                break;
+            case 1:
+            if (x_Coordinate + moveDistance < rows){
+                x_Coordinate += moveDistance;
+            }
+                break;
+            case 2:
+                if (y_Coordinate - moveDistance >= 0){
+                    y_Coordinate -= moveDistance;
+                }
+                break;
+            case 3:
+                if (y_Coordinate + moveDistance < cols){
+                    y_Coordinate += moveDistance;
+                }
+                break;
+            default:{
+                move(rows, cols);
+            }
+        }
+        this.decreaseEnergy(getMaxSpeed()*2);
+        System.out.println(getIcon() + " moved to cell: " + x_Coordinate + ", " + y_Coordinate);
     }
 
     public void setPreyChance(Class<? extends Animal> preyClass, int chance) {

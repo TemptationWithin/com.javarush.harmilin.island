@@ -13,11 +13,9 @@ public class Cell {
     private final Set<String> icons = new HashSet<>();
     private final List<Animal> animals = new CopyOnWriteArrayList<>();
     private final List<Plant> plants = new CopyOnWriteArrayList<>();
-    private final Map<String, Integer> limits;
-
-    public Cell() {
-        this.limits = Island.getAnimalLimits();
-    }
+    private static final Map<String, Integer> limits = Island.getAnimalLimits();
+    private int rows;
+    private int cols;
 
     public synchronized void addAnimal(Animal animal){
         long count = animals.stream().filter(a -> a.getClass() == animal.getClass()).count();
@@ -54,4 +52,5 @@ public class Cell {
         }
         return String.join(" ", icons);
     }
+
 }

@@ -16,22 +16,24 @@ public class Main {
         System.out.println("Thank you.\nIsland size will be: " + width + " x " + length);
 
         Island island = new Island(width, length);
-        island.placeAnimal(new Boar());
-        island.placeAnimal(new Buffalo());
-        island.placeAnimal(new Caterpillar());
-        island.placeAnimal(new Deer());
-        island.placeAnimal(new Duck());
-        island.placeAnimal(new Goat());
-        island.placeAnimal(new Horse());
-        island.placeAnimal(new Mouse());
-        island.placeAnimal(new Rabbit());
-        island.placeAnimal(new Sheep());
-        island.placeAnimal(new Bear());
-        island.placeAnimal(new Boa());
-        island.placeAnimal(new Eagle());
-        island.placeAnimal(new Fox());
-        island.placeAnimal(new Wolf());
-        island.placePlant(new Plant());
+        //tests
+        island.placeAnimal(new Boar(island));
+        island.placeAnimal(new Buffalo(island));
+        island.placeAnimal(new Caterpillar(island));
+        island.placeAnimal(new Deer(island));
+        island.placeAnimal(new Duck(island));
+        island.placeAnimal(new Goat(island));
+        island.placeAnimal(new Horse(island));
+        island.placeAnimal(new Mouse(island));
+        island.placeAnimal(new Rabbit(island));
+        island.placeAnimal(new Sheep(island));
+        island.placeAnimal(new Bear(island));
+        island.placeAnimal(new Boa(island));
+        island.placeAnimal(new Eagle(island));
+        island.placeAnimal(new Fox(island));
+        island.placeAnimal(new Wolf(island));
+        island.placePlant(new Plant(island));
+
         island.display();
 
         System.out.println("Animals: " + Animal.animalCount);
@@ -45,8 +47,6 @@ public class Main {
         }
         island.stopSimulation();
         System.out.println("Simulation stopped.");
-
-        Cell cell = new Cell();
-        System.out.println(cell.getLimits());
+;
     }
 }

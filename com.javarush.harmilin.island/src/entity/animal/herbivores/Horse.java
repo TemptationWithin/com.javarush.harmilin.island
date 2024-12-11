@@ -1,12 +1,13 @@
 package entity.animal.herbivores;
 
 import entity.animal.Animal;
+import entity.island.Island;
 
 public class Horse extends Herbivore{
     public static int horseCount = 0;
 
-    public Horse() {
-        super(400, 4, 60, 100);
+    public Horse(Island island) {
+        super(island, 400, 4, 60, 100);
         horseCount++;
     }
 
@@ -17,6 +18,6 @@ public class Horse extends Herbivore{
 
     @Override
     protected Animal createOffspring() {
-        return new Horse();
+        return new Horse(getIsland());
     }
 }

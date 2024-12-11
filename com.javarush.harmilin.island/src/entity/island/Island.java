@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.Getter;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -15,12 +16,13 @@ public class Island {
     private final int rows;
     private final int cols;
     private final Cell[][] grid;
-    private final List<Animal> animals = new ArrayList<>();
+    private final List<Animal> animals;
     @Getter
-    private static final Map<String, Integer> animalLimits = new HashMap<>();
+    private static final Map<String, Integer> animalLimits;
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     static {
+        animalLimits = new HashMap<>();
         animalLimits.put("Boar", 50);
         animalLimits.put("Buffalo", 10);
         animalLimits.put("Caterpillar", 1000);
@@ -43,6 +45,7 @@ public class Island {
         this.rows = rows;
         this.cols = cols;
         this.grid = new Cell[rows][cols];
+        this.animals = new CopyOnWriteArrayList<>();
         initializeGrid();
     }
 
