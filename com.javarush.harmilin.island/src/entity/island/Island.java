@@ -16,9 +16,12 @@ public class Island {
     private final int rows;
     private final int cols;
     private final Cell[][] grid;
-    private final List<Animal> animals;
+    private List<Animal> animals;
+    private List<Plant> plants;
     @Getter
     private static final Map<String, Integer> animalLimits;
+    @Getter
+    private static final Map<String, Integer> plantLimits;
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     static {
@@ -38,7 +41,9 @@ public class Island {
         animalLimits.put("Eagle", 20);
         animalLimits.put("Fox", 30);
         animalLimits.put("Wolf", 30);
-        animalLimits.put("Plant", 200);
+
+        plantLimits = new HashMap<>();
+        plantLimits.put("Plant", 200);
     }
 
     public Island(int rows, int cols){
@@ -46,6 +51,7 @@ public class Island {
         this.cols = cols;
         this.grid = new Cell[rows][cols];
         this.animals = new CopyOnWriteArrayList<>();
+        this.plants = new CopyOnWriteArrayList<>();
         initializeGrid();
     }
 
@@ -57,18 +63,22 @@ public class Island {
         }
     }
 
-    public void placeAnimal(Animal animal){
+    public void placeAnimal(Island island, Animal animal){
         Random random = new Random();
         animal.setX_Coordinate(random.nextInt(rows));
         animal.setY_Coordinate(random.nextInt(cols));
-        grid[animal.getX_Coordinate()][animal.getY_Coordinate()].addIcon(animal.getIcon());
+        island.animals.add(animal);
+        animal.setCurrentCell(grid[animal.getX_Coordinate()][animal.getY_Coordinate()]);
+        animal.getCurrentCell().addIcon(animal.getIcon());
     }
 
-    public void placePlant(Plant plant){
+    public void placePlant(Island island, Plant plant){
         Random random = new Random();
         plant.setX_Coordinate(random.nextInt(rows));
         plant.setY_Coordinate(random.nextInt(cols));
-        grid[plant.getX_Coordinate()][plant.getY_Coordinate()].addIcon(plant.getIcon());
+        island.plants.add(plant);
+        plant.setCurrentCell(grid[plant.getX_Coordinate()][plant.getY_Coordinate()]);
+        plant.getCurrentCell().addIcon(plant.getIcon());
     }
 
     private int calculateMaxCellWidth(){
@@ -104,5 +114,50 @@ public class Island {
             animal.die();
         }
         executorService.shutdown();
+    }
+
+    public void moveAllAnimals(){
+        for (Animal animal : animals){
+            if (animal.isAlive()){
+                animal.move(animal.getIsland().getRows(), animal.getIsland().getCols());
+                grid[animal.getX_Coordinate()][animal.getY_Coordinate()].addIcon(animal.getIcon());
+            }
+        }
+    }
+
+    public void growAllPlants(){
+        Random random = new Random();
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (grid[i][j].hasPlants()){
+                    Plant plant = getPlants().get(random.nextInt(plants.size()));
+                    grid[i][j].addPlant(plant);
+                    grid[i][j].addIcon(plant.getIcon());
+                }
+            }
+        }
+    }
+
+    public void growAfterRain(){
+        for (int i = 0; i < 100; i++) {
+            this.placePlant(this, new Plant(this));
+        }
+    }
+
+    public void cleanUp(){
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                grid[i][j].removeDeadIcons();
+            }
+        }
+    }
+
+    @Override
+    public String toString(){
+        return "Island{" +
+                "rows=" + rows +
+                ", cols=" + cols +
+                ", numberOfAnimals=" + animals.size() +  // Просто количество животных
+                '}';
     }
 }

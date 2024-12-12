@@ -1,9 +1,10 @@
 package entity.animal.herbivores;
 
 import entity.animal.Animal;
+import entity.animal.NotMovable;
 import entity.island.Island;
 
-public class Caterpillar extends Herbivore{
+public class Caterpillar extends Herbivore implements NotMovable {
     public static int caterpillarCount = 0;
 
     public Caterpillar(Island island) {

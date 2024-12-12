@@ -1,6 +1,7 @@
 package entity.animal;
 
 import entity.animal.herbivores.Herbivore;
+import entity.animal.predators.Predator;
 import entity.cell.Cell;
 import entity.island.Island;
 import entity.plant.Plant;
@@ -47,6 +48,9 @@ public abstract class Animal {
     protected void eatAnimals(Cell cell) {
         List<Animal> potentialPrey = cell.getAnimals();
         Random random = new Random();
+        if (getEnergy() <= 70){
+            isHungry = true;
+        }
         synchronized (cell) {
             for (Animal prey : potentialPrey) {
                 if (prey == this) continue;
@@ -65,10 +69,16 @@ public abstract class Animal {
 
     private void eatPlants(Cell cell) {
         synchronized (cell) {
+            if (getEnergy() <= 70){
+                isHungry = true;
+            }
             if ((this instanceof Herbivore) && isHungry()) {
                 List<Plant> plants = cell.getPlants();
                 if (!plants.isEmpty()) {
                     System.out.println(this.getIcon() + " ate " + plants.get(0).getIcon());
+                    plants.get(0).setWeight(0);
+                    plants.remove(0);
+                    Plant.plantCount--;
                     increaseEnergy(Math.min(100, getEnergy()+10));
                     isHungry = false;
                 } else {
@@ -115,6 +125,9 @@ public abstract class Animal {
 
     public void die() {
         isAlive = false;
+        this.setIcon("💀");
+        this.getCurrentCell().addIcon("💀");
+        island.getAnimals().remove(this);
     }
 
     protected void performActions() {
@@ -136,40 +149,57 @@ public abstract class Animal {
     }
 
     public void move(int rows, int cols) {
-        Random random = new Random();
-        int moveDistance = random.nextInt(getMaxSpeed())+1;
-        int direction = random.nextInt(4);
-        switch (direction){
-            case 0:
-                if (x_Coordinate - moveDistance >= 0) {
-                    x_Coordinate -= moveDistance;
+        if (!(this instanceof NotMovable && this.isAlive())){
+            Random random = new Random();
+            int moveDistance = random.nextInt(getMaxSpeed())+1;
+            int direction = random.nextInt(4);
+            switch (direction){
+                case 0:
+                    if (x_Coordinate - moveDistance >= 0) {
+                        x_Coordinate -= moveDistance;
+                    }
+                    break;
+                case 1:
+                    if (x_Coordinate + moveDistance < rows){
+                        x_Coordinate += moveDistance;
+                    }
+                    break;
+                case 2:
+                    if (y_Coordinate - moveDistance >= 0){
+                        y_Coordinate -= moveDistance;
+                    }
+                    break;
+                case 3:
+                    if (y_Coordinate + moveDistance < cols){
+                        y_Coordinate += moveDistance;
+                    }
+                    break;
+                default:{
+                    move(rows, cols);
                 }
-                break;
-            case 1:
-            if (x_Coordinate + moveDistance < rows){
-                x_Coordinate += moveDistance;
             }
-                break;
-            case 2:
-                if (y_Coordinate - moveDistance >= 0){
-                    y_Coordinate -= moveDistance;
+            this.decreaseEnergy(getMaxSpeed()*2);
+            if (this.getEnergy() <= 0){
+                this.die();
+                animalCount--;
+                if (this instanceof Predator){
+                    Predator.predatorCount--;
+                } else if (this instanceof Herbivore){
+                    Herbivore.herbivoreCount--;
                 }
-                break;
-            case 3:
-                if (y_Coordinate + moveDistance < cols){
-                    y_Coordinate += moveDistance;
-                }
-                break;
-            default:{
-                move(rows, cols);
+                System.out.println(this.getIcon() + "died of exhaustion.");
             }
+            //System.out.println(getIcon() + " moved to cell: " + x_Coordinate + ", " + y_Coordinate);
         }
-        this.decreaseEnergy(getMaxSpeed()*2);
-        System.out.println(getIcon() + " moved to cell: " + x_Coordinate + ", " + y_Coordinate);
     }
 
     public void setPreyChance(Class<? extends Animal> preyClass, int chance) {
         preyChances.put(preyClass, chance);
+    }
+
+    @Override
+    public String toString() {
+        return this.getIcon() + "(" + this.getClass().getSimpleName() +  "(" + this.getSex() +  "))";
     }
 
 }
