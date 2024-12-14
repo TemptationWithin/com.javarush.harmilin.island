@@ -14,7 +14,7 @@ public class Plant implements NotMovable {
     Island island;
     public static int plantCount = 0;
 
-    public Plant(Island island){
+    public Plant(Island island) {
         this.island = island;
         this.weight = 1;
         plantCount++;
@@ -22,5 +22,14 @@ public class Plant implements NotMovable {
 
     public String getIcon() {
         return "🌱";
+    }
+
+    public boolean isAlive() {
+        return weight > 0;
+    }
+
+    @Override
+    public String toString() {
+        return this.getIcon() + ", weight: " + this.getWeight();
     }
 }

@@ -43,16 +43,19 @@ public class Main {
         while (!input.equalsIgnoreCase("STOP")){
             island.cleanUp();
             if (day % 5 == 0){
-               // island.growAllPlants();
+                island.growAllPlants();
+                System.out.println("Plants growing...");
             }
-            island.moveAllAnimals();
+            //island.moveAllAnimals();
             System.out.println("");
             System.out.println("Welcome to day #" + day);
             System.out.println("Animals: " + Animal.animalCount);
             System.out.println("Predators: " + Predator.predatorCount);
             System.out.println("Herbivores: " + Herbivore.herbivoreCount);
             island.display();
-
+            if (input.equalsIgnoreCase("stat")){
+                island.statisticPerCell();
+            }
             day++;
             input = console.nextLine();
         }

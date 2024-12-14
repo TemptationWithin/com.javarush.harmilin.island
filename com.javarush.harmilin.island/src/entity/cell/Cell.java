@@ -23,6 +23,7 @@ public class Cell {
         if (count <= maxCount) {
             this.animals.add(animal);
             animal.setCurrentCell(this);
+            animal.getIsland().getAnimals().add(animal);
         } else {
             System.out.println("Cell is full for " + animal.getClass().getSimpleName());
         }
@@ -34,6 +35,7 @@ public class Cell {
         if (count <= maxCount) {
             plants.add(plant);
             plant.setCurrentCell(this);
+            plant.getIsland().getPlants().add(plant);
         } else {
             System.out.println("Cell is full for " + plant.getClass().getSimpleName());
         }
@@ -47,7 +49,7 @@ public class Cell {
         return limits.get(animalClass.getSimpleName());
     }
 
-    private int getMaxPlantsPerCell(Class<? extends Plant> plantClass){
+    private int getMaxPlantsPerCell(Class<? extends Plant> plantClass) {
         return plantLimits.get(plantClass.getSimpleName());
     }
 
@@ -66,16 +68,25 @@ public class Cell {
 
     public void removeDeadIcons() {
         synchronized (animalIcons) {
-            Iterator<String> iterator = animalIcons.iterator();
-            while (iterator.hasNext()) {
-                String icon = iterator.next();
+            Iterator<String> animalIterator = animalIcons.iterator();
+            while (animalIterator.hasNext()) {
+                String icon = animalIterator.next();
                 boolean isAlive = animals.stream()
                         .anyMatch(animal -> animal.getIcon().equals(icon) && animal.isAlive()
-                        && !animal.getIcon().equals("💀"));
-               if (!isAlive)
-                {
-                    iterator.remove();
-               }
+                                && !animal.getIcon().equals("💀"));
+                if (!isAlive) {
+                    animalIterator.remove();
+                }
+            }
+            Iterator<String> plantIterator = plantIcons.iterator();
+            while (plantIterator.hasNext()){
+                while (plantIterator.hasNext()){
+                    String icon = plantIterator.next();
+                    boolean isPlantAlive = plants.stream().anyMatch(s -> s.getIcon().equals(icon) && s.getWeight() > 0);
+                    if (!isPlantAlive){
+                        plantIterator.remove();
+                    }
+                }
             }
         }
     }
@@ -84,12 +95,7 @@ public class Cell {
         return animalIcons.isEmpty();
     }
 
-    public boolean allPlantsAreDead(String icon) {
-        return plants.stream()
-                .filter(p -> p.getIcon().equals(icon))
-                .allMatch(p -> p.getWeight() == 0);
-    }
-    public boolean hasPlants(){
+    public boolean hasPlants() {
         return !plants.isEmpty();
     }
 
@@ -109,4 +115,19 @@ public class Cell {
         return getFormattedContent();
     }
 
+    public synchronized void cellStatistic() {
+        System.out.println(" Animals: "
+                + this.getAnimals().size()
+                + ". Plants: "
+                + this.getPlants().size());
+        if (!animals.isEmpty()) {
+            animals.forEach(s -> System.out.print(s.toString() + ", "));
+        }
+        System.out.print("\n");
+        if (!plants.isEmpty()) {
+            plants.forEach(s -> System.out.print(s.toString() + ", "));
+        }
+        plants.forEach(s -> System.out.print(s.toString() + ", "));
+        System.out.println("\n" + "---".repeat(100));
+    }
 }
