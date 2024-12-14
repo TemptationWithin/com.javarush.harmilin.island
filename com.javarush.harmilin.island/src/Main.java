@@ -1,17 +1,15 @@
 import entity.island.Island;
+import handler.ExecutorHandler;
 import handler.Timer;
 import handler.Validator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.*;
 
 public class Main {
     public static void main(String[] args) {
         Scanner console = new Scanner(System.in);
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        ExecutorHandler executorHandler = new ExecutorHandler();
 
         System.out.println("Welcome to Island. Lets customize your island.\nPlease, enter size of island (AxB):");
         int width = Validator.getValidatedSizeInput(console, "Please, select width of island: ");
@@ -26,31 +24,29 @@ public class Main {
         System.out.println(island);
         Timer.sleep(1000);
         System.out.println("Welcome to hungry games. Lets start...");
-        Timer.funnyPreparing();
+        //Timer.funnyPreparing();
+        Timer.sleep(500);
         int day = 1;
+
         while (day < dayLimitation) {
-            Timer.sleep(4000);
             synchronized (System.out){
                 System.out.println("+" + "---".repeat(2) + " +");
                 System.out.println("|DAY #" + day + " |");
                 System.out.println("+" + "___".repeat(2) + " +");
             }
-            executorService.submit(island::cleanUp);
 
-            scheduler.scheduleWithFixedDelay(island::growAllPlants, 0, 10, TimeUnit.SECONDS);
-            scheduler.scheduleWithFixedDelay(island::display, 0, 4000, TimeUnit.MILLISECONDS);
+            executorHandler.getExecutorService().submit(island::cleanUp);
+            executorHandler.getScheduler().scheduleWithFixedDelay(island::growAllPlants, 0, 10, TimeUnit.SECONDS);
+            executorHandler.getScheduler().scheduleWithFixedDelay(island::moveAllAnimals, 0, 60, TimeUnit.SECONDS);
+            executorHandler.getScheduler().scheduleWithFixedDelay(island::display, 0, 4000, TimeUnit.MILLISECONDS);
 
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e){
-                Thread.currentThread().interrupt();
-            }
+            Timer.sleep(5000);
 
             day++;
 
             if (day == dayLimitation) {
-                executorService.shutdown();
-                scheduler.shutdown();
+                executorHandler.shutdownAllExecutors();
+                System.out.println("\n==================== PAUSED ====================");
                 int firstOption = Validator.getValidatedIntLimitInput(console, "Would you like to continue? \n1. - Yes." +
                         "\nAny other number will stop simulation");
                 if (firstOption == 1) {
@@ -65,6 +61,7 @@ public class Main {
                     int additionalDays = Validator.getValidatedIntLimitInput(console, "How many days would you like to add?");
                     dayLimitation = dayLimitation + additionalDays;
                 }
+                executorHandler.restartExecutors();
             }
         }
 
@@ -72,15 +69,10 @@ public class Main {
         island.statisticPerCell();
         island.display();
         island.stopSimulation();
-        executorService.shutdown();
-        scheduler.shutdown();
+        executorHandler.shutdownAllExecutors();
         console.close();
         System.out.println("Simulation stopped.");
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        Timer.sleep(1000);
     }
 }

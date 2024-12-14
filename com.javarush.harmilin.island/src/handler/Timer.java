@@ -73,6 +73,10 @@ public class Timer {
         sleep(500);
         System.out.print("🌾"+"🌻"+"🌾"+"🌻"+"🌻"+"🌾\n");
         sleep(500);
+        System.out.print("🌳"+"🌲"+"🌳"+"🌲"+"🌳"+"🌲\n");
+        sleep(400);
+        System.out.print("🌲"+"🌳"+"🌲"+"🌳"+"🌲"+"🌳\n");
+        sleep(500);
     }
 
 }
