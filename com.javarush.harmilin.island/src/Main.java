@@ -1,8 +1,5 @@
-import entity.animal.Animal;
-import entity.animal.herbivore.*;
-import entity.animal.predator.*;
 import entity.island.Island;
-import entity.plant.Plant;
+import handler.Timer;
 import handler.Validator;
 
 import java.util.ArrayList;
@@ -13,65 +10,77 @@ import java.util.concurrent.*;
 public class Main {
     public static void main(String[] args) {
         Scanner console = new Scanner(System.in);
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        List<Runnable> tasks = new ArrayList<>();
 
-
-        System.out.println("Welcome to Island. Please, enter size of island (has to be bigger than 19x19.");
-        int width = Validator.getValidatedInput(console, "Please, select width of island: ");
-        int length = Validator.getValidatedInput(console, "Please, select length of island: ");
-        System.out.println("Thank you.\nIsland size will be: " + width + " x " + length);
-
+        System.out.println("Welcome to Island. Lets customize your island.\nPlease, enter size of island (AxB):");
+        int width = Validator.getValidatedSizeInput(console, "Please, select width of island: ");
+        int length = Validator.getValidatedSizeInput(console, "Please, select length of island: ");
+        int dayLimitation = Validator.getValidatedIntLimitInput(console, "Please, let us know how many days you would like to observe: ");
+        int startAnimals = Validator.getValidatedIntLimitInput(console, "Please, let us know how many animals you want to place?\n" +
+                "Animal types will be chosen randomly but we will apply correct proportion of predators and herbivores: ");
+        int startPlants = Validator.getValidatedIntLimitInput(console, "Please, let us know how many plants you want to place?: ");
         Island island = new Island(width, length);
-        island.randomBegin(100,50);
-
-        String input = console.nextLine();
+        island.randomBegin(startAnimals, startPlants);
+        System.out.println("Thanks. Your settings are: ");
+        System.out.println(island);
+        Timer.sleep(1000);
+        System.out.println("Welcome to hungry games. Lets start...");
+        Timer.funnyPreparing();
         int day = 1;
-        //while (!input.equalsIgnoreCase("STOP")){
-            tasks.add(island::cleanUp);
-            scheduler.scheduleWithFixedDelay(island::growAllPlants, 0, 60, TimeUnit.SECONDS);
-            scheduler.scheduleWithFixedDelay(island::display, 0, 15, TimeUnit.SECONDS);
-
-            System.out.println("");
-            System.out.println("Welcome to day #" + day);
-
-            List<Future<?>> futures = new ArrayList<>();
-
-            for (Runnable task : tasks){
-                futures.add((executorService.submit(task)));
+        while (day < dayLimitation) {
+            Timer.sleep(4000);
+            synchronized (System.out){
+                System.out.println("+" + "---".repeat(2) + " +");
+                System.out.println("|DAY #" + day + " |");
+                System.out.println("+" + "___".repeat(2) + " +");
             }
-            for (Future<?> future : futures){
-                try {
-                    future.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
+            executorService.submit(island::cleanUp);
+
+            scheduler.scheduleWithFixedDelay(island::growAllPlants, 0, 10, TimeUnit.SECONDS);
+            scheduler.scheduleWithFixedDelay(island::display, 0, 4000, TimeUnit.MILLISECONDS);
+
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e){
+                Thread.currentThread().interrupt();
+            }
+
+            day++;
+
+            if (day == dayLimitation) {
+                executorService.shutdown();
+                scheduler.shutdown();
+                int firstOption = Validator.getValidatedIntLimitInput(console, "Would you like to continue? \n1. - Yes." +
+                        "\nAny other number will stop simulation");
+                if (firstOption == 1) {
+                    island.statisticPerCell();
+                    int secondOptionInput = Validator.getValidatedIntLimitInput(console, "Do you want to add more Animals and plants? \nIf Yes - press 1.");
+                    if (secondOptionInput == 1) {
+                        System.out.println("You have to add at least 1 animal and 1 plant!");
+                        int amountOfNewAnimals = Validator.getValidatedIntLimitInput(console, "How many animals would you like to add to your island?");
+                        int amountOfNewPlants = Validator.getValidatedIntLimitInput(console, "And many plants?");
+                        island.randomBegin(amountOfNewAnimals, amountOfNewPlants);
+                    }
+                    int additionalDays = Validator.getValidatedIntLimitInput(console, "How many days would you like to add?");
+                    dayLimitation = dayLimitation + additionalDays;
                 }
             }
-            //executorService.submit(island::display);
-
-            if (input.equalsIgnoreCase("stat")){
-                island.statisticPerCell();
-            }
-            day++;
-            input = console.nextLine();
-        //}
-
-        System.out.println("Animals: " + Animal.animalCount);
-        System.out.println("Predators: " + Predator.predatorCount);
-        System.out.println("Herbivores: " + Herbivore.herbivoreCount);
-
-        try{
-            Thread.sleep(100);
-        } catch (InterruptedException e){
-            Thread.currentThread().interrupt();
         }
 
+        System.out.println("Last day #" + dayLimitation + " ended.");
+        island.statisticPerCell();
+        island.display();
         island.stopSimulation();
         executorService.shutdown();
         scheduler.shutdown();
         console.close();
         System.out.println("Simulation stopped.");
-;
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

@@ -3,7 +3,7 @@ package entity.animal;
 import catalog.Names;
 import entity.animal.herbivore.Herbivore;
 import entity.animal.predator.Predator;
-import entity.cell.Cell;
+import entity.island.Cell;
 import entity.island.Island;
 import entity.plant.Plant;
 import lombok.Data;
@@ -46,9 +46,8 @@ public abstract class Animal {
     }
 
     protected synchronized void eat() {
-        Cell cell = getCurrentCell();
-        this.eatAnimals(cell);
-        this.eatPlants(cell);
+        this.eatAnimals(getCurrentCell());
+        this.eatPlants(getCurrentCell());
     }
 
     protected void eatAnimals(Cell cell) {
@@ -63,7 +62,7 @@ public abstract class Animal {
                 Integer chance = getPreyChances().get(prey.getClass());
                 if (chance != null && random.nextInt(100) < chance) {
                     System.out.println(this.getIcon() + " successfully ate " + prey.getIcon());
-                    cell.removeAnimal(prey);
+                    prey.die();
                     increaseEnergy(Math.min(100, getEnergy() + 40));
                     isHungry = false;
                     return;
@@ -80,11 +79,11 @@ public abstract class Animal {
             }
             if ((this instanceof Herbivore) && isHungry()) {
                 List<Plant> plants = cell.getPlants();
+                Random random = new Random();
                 if (!plants.isEmpty()) {
-                    System.out.println(this.getIcon() + " ate " + plants.get(0).getIcon());
-                    plants.get(0).setWeight(0);
-                    plants.remove(0);
-                    Plant.plantCount.decrementAndGet();
+                    int preyPlantIndex = random.nextInt(plants.size());
+                    System.out.println(this.getIcon() + " ate " + plants.get(preyPlantIndex).getIcon());
+                    plants.get(preyPlantIndex).die();
                     increaseEnergy(Math.min(100, getEnergy() + 10));
                     isHungry = false;
                 } else {

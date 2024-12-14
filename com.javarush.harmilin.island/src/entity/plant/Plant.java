@@ -1,7 +1,7 @@
 package entity.plant;
 
 import entity.animal.NotMovable;
-import entity.cell.Cell;
+import entity.island.Cell;
 import entity.island.Island;
 import lombok.Data;
 
@@ -29,6 +29,13 @@ public class Plant implements NotMovable {
 
     public boolean isAlive() {
         return weight > 0;
+    }
+
+    public void die(){
+        this.setWeight(0);
+        this.getCurrentCell().getPlants().remove(this);
+        this.getIsland().getPlants().remove(this);
+        Plant.plantCount.decrementAndGet();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package entity.cell;
+package entity.island;
 
 import entity.animal.Animal;
 import entity.island.Island;

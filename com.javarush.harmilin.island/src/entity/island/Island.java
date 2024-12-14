@@ -3,17 +3,13 @@ package entity.island;
 import entity.animal.Animal;
 import entity.animal.herbivore.*;
 import entity.animal.predator.*;
-import entity.cell.Cell;
 import entity.plant.Plant;
 import lombok.Data;
 import lombok.Getter;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Data
 public class Island implements Runnable {
@@ -100,10 +96,7 @@ public class Island implements Runnable {
     }
 
     public synchronized void display() {
-        System.out.println("Animals: " + Animal.animalCount);
-        System.out.println("Predators: " + Predator.predatorCount);
-        System.out.println("Herbivores: " + Herbivore.herbivoreCount);
-        System.out.println("Plants: " + Plant.plantCount);
+        System.out.println(amountToString());
         int cellWidth = calculateMaxCellWidth();
         String horizontalBorder = "+".repeat(cellWidth * cols + cols + 1);
         System.out.println(horizontalBorder);
@@ -119,9 +112,22 @@ public class Island implements Runnable {
     }
 
     public void stopSimulation() {
+        int i = 0;
         for (Animal animal : animals) {
             animal.die();
+            if (i <= 5){
+                System.out.print("God killed: " + animal);
+                i++;
+            } else {
+                System.out.print("\n");
+                i = 0;
+            }
         }
+        System.out.println("God killed all " + this.plants.size() +  " plants.");
+        for (Plant plant : plants){
+            plant.die();
+        }
+        System.out.println("The Island is sterile again");
     }
 
     public void moveAllAnimals() {
@@ -140,7 +146,7 @@ public class Island implements Runnable {
     }
 
     public void growAllPlants() {
-        System.out.println("Plants growing...");
+        System.out.println("Plants are growing...");
         Random random = new Random();
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -176,18 +182,21 @@ public class Island implements Runnable {
         }
     }
 
+    public String amountToString() {
+        return "Animals: " + Animal.animalCount + ": " +
+                "Predators: " + Predator.predatorCount +
+                ", Herbivores: " + Herbivore.herbivoreCount + ". " +
+                "Plants: " + Plant.plantCount;
+    }
+
     @Override
     public String toString() {
-        return "Island{" +
-                "rows=" + rows +
-                ", cols=" + cols +
-                ", numberOfAnimals=" + animals.size() +  // Просто количество животных
-                '}';
+        return "Island size is: " + rows + " x " + cols +
+                "\n" + amountToString();
     }
 
     public synchronized void statisticPerCell() {
-        System.out.println("Total animals: " + Animal.animalCount + ". Predators: " + Predator.predatorCount + ", herbivores: " + Herbivore.herbivoreCount);
-        System.out.println("Total plants: " + Plant.plantCount);
+        System.out.println(amountToString());
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 System.out.print("Statistic in cell: " + "[" + i + "]" + "," + "[" + j + "]");
@@ -201,11 +210,11 @@ public class Island implements Runnable {
         for (int j = 0; j < animals; j++) {
             int i = random.nextInt(animalLimits.size());
             switch (i) {
-                case 0:{
+                case 0: {
                     this.placeAnimal(this, new Bear(this));
                     break;
                 }
-                case 1:{
+                case 1: {
                     this.placeAnimal(this, new Boa(this));
                     break;
                 }
