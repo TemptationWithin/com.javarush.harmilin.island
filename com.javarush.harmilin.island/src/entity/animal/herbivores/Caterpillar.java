@@ -4,12 +4,14 @@ import entity.animal.Animal;
 import entity.animal.NotMovable;
 import entity.island.Island;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Caterpillar extends Herbivore implements NotMovable {
-    public static int caterpillarCount = 0;
+    public static AtomicInteger caterpillarCount = new AtomicInteger(0);
 
     public Caterpillar(Island island) {
         super(island,0.01, 0, 0, 100);
-        caterpillarCount++;
+        caterpillarCount.incrementAndGet();
     }
 
     @Override

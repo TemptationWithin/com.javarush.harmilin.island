@@ -3,12 +3,14 @@ package entity.animal.herbivores;
 import entity.animal.Animal;
 import entity.island.Island;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Goat extends Herbivore{
-    public static int goatCount = 0;
+    public static AtomicInteger goatCount = new AtomicInteger(0);
 
     public Goat(Island island) {
         super(island,70, 3, 10, 100);
-        goatCount++;
+        goatCount.incrementAndGet();
     }
 
     @Override

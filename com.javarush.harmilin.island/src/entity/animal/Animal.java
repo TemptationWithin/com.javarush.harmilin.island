@@ -11,10 +11,11 @@ import lombok.Data;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Data
 public abstract class Animal {
-    public static int animalCount = 0;
+    public static AtomicInteger animalCount = new AtomicInteger(0);
 
     private final int maxSpeed;
     private final double maxWeight;
@@ -41,10 +42,10 @@ public abstract class Animal {
         if (sex == 'F'){
             this.name = Names.getRandomFemaleName();
         } else this.name = Names.getRandomMaleName();
-        animalCount++;
+        animalCount.incrementAndGet();
     }
 
-    protected void eat() {
+    protected synchronized void eat() {
         Cell cell = getCurrentCell();
         this.eatAnimals(cell);
         this.eatPlants(cell);
@@ -83,7 +84,7 @@ public abstract class Animal {
                     System.out.println(this.getIcon() + " ate " + plants.get(0).getIcon());
                     plants.get(0).setWeight(0);
                     plants.remove(0);
-                    Plant.plantCount--;
+                    Plant.plantCount.decrementAndGet();
                     increaseEnergy(Math.min(100, getEnergy() + 10));
                     isHungry = false;
                 } else {
@@ -93,7 +94,7 @@ public abstract class Animal {
         }
     }
 
-    public void reproduce() {
+    public synchronized void reproduce() {
         Cell cell = getCurrentCell();
         synchronized (cell) {
             List<Animal> animalsInCell = cell.getAnimals();
@@ -134,9 +135,15 @@ public abstract class Animal {
         this.getCurrentCell().addIcon("💀");
         island.getAnimals().remove(this);
         this.getCurrentCell().removeAnimal(this);
+        animalCount.decrementAndGet();
+        if (this instanceof Predator) {
+            Predator.predatorCount--;
+        } else if (this instanceof Herbivore) {
+            Herbivore.herbivoreCount--;
+        }
     }
 
-    protected void performActions() {
+    public void performActions() {
         Random random = new Random();
         int action = random.nextInt(3);
         switch (action) {
@@ -154,7 +161,7 @@ public abstract class Animal {
         energy = Math.max(0, energy - amount);
     }
 
-    public void move(int rows, int cols) {
+    public synchronized void move(int rows, int cols) {
         if (!(this instanceof NotMovable && this.isAlive())) {
             Random random = new Random();
             int moveDistance = random.nextInt(getMaxSpeed()) + 1;
@@ -180,20 +187,11 @@ public abstract class Animal {
                         y_Coordinate += moveDistance;
                     }
                     break;
-                default: {
-                    move(rows, cols);
-                }
             }
             this.decreaseEnergy(getMaxSpeed() * 2);
             if (this.getEnergy() <= 0) {
                 this.die();
-                animalCount--;
-                if (this instanceof Predator) {
-                    Predator.predatorCount--;
-                } else if (this instanceof Herbivore) {
-                    Herbivore.herbivoreCount--;
-                }
-                System.out.println(this.getIcon() + "died of exhaustion.");
+                System.out.println(this + "died of exhaustion.");
             }
             //System.out.println(getIcon() + " moved to cell: " + x_Coordinate + ", " + y_Coordinate);
         }
@@ -205,7 +203,7 @@ public abstract class Animal {
 
     @Override
     public String toString() {
-        return this.getIcon() + this.getName() + "(" + this.getClass().getSimpleName() + "(" + this.getSex() + "))" + ". Energy: " + this.getEnergy();
+        return this.getIcon() + this.getName() + "(" + this.getClass().getSimpleName() + "(" + this.getSex() + "))" + ". Energy: " + this.getEnergy() + " ";
     }
 
 }

@@ -1,15 +1,26 @@
 import entity.animal.Animal;
 import entity.animal.herbivores.*;
 import entity.animal.predators.*;
+import entity.island.Day;
 import entity.island.Island;
 import entity.plant.Plant;
 import handler.Validator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
     public static void main(String[] args) {
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        List<Callable<Void>> tasks = new ArrayList<>();
+
         Scanner console = new Scanner(System.in);
+
         System.out.println("Welcome to Island. Please, enter size of island (has to be bigger than 19x19.");
         int width = Validator.getValidatedInput(console, "Please, select width of island: ");
         int length = Validator.getValidatedInput(console, "Please, select length of island: ");
@@ -41,18 +52,35 @@ public class Main {
         String input = console.nextLine();
         int day = 1;
         while (!input.equalsIgnoreCase("STOP")){
-            island.cleanUp();
+
+            tasks.add(() -> {
+                island.cleanUp();
+                return null;
+            });
+
             if (day % 5 == 0){
-                island.growAllPlants();
-                System.out.println("Plants growing...");
+                tasks.add(() -> {
+                        island.growAllPlants();
+                        System.out.println("Plants growing...");
+                    return null;
+                });
             }
-            //island.moveAllAnimals();
             System.out.println("");
             System.out.println("Welcome to day #" + day);
-            System.out.println("Animals: " + Animal.animalCount);
-            System.out.println("Predators: " + Predator.predatorCount);
-            System.out.println("Herbivores: " + Herbivore.herbivoreCount);
-            island.display();
+            tasks.add(() -> {
+                System.out.println("Animals: " + Animal.animalCount);
+                System.out.println("Predators: " + Predator.predatorCount);
+                System.out.println("Herbivores: " + Herbivore.herbivoreCount);
+                System.out.println("Plants: " + Plant.plantCount);
+                island.display();
+                return null;
+            });
+
+            try {
+                executorService.invokeAll(tasks);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             if (input.equalsIgnoreCase("stat")){
                 island.statisticPerCell();
             }

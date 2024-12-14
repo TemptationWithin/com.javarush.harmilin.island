@@ -24,6 +24,7 @@ public class Cell {
             this.animals.add(animal);
             animal.setCurrentCell(this);
             animal.getIsland().getAnimals().add(animal);
+            Animal.animalCount.incrementAndGet();
         } else {
             System.out.println("Cell is full for " + animal.getClass().getSimpleName());
         }
@@ -36,6 +37,7 @@ public class Cell {
             plants.add(plant);
             plant.setCurrentCell(this);
             plant.getIsland().getPlants().add(plant);
+            Plant.plantCount.incrementAndGet();
         } else {
             System.out.println("Cell is full for " + plant.getClass().getSimpleName());
         }

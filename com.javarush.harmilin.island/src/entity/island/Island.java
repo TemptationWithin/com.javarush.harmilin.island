@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Data
-public class Island {
+public class Island implements Runnable{
     private final int rows;
     private final int cols;
     private final Cell[][] grid;
@@ -98,7 +98,7 @@ public class Island {
         return maxWidth + 2;
     }
 
-    public void display() {
+    public synchronized void display() {
         int cellWidth = calculateMaxCellWidth();
         String horizontalBorder = "+".repeat(cellWidth * cols + cols + 1);
         System.out.println(horizontalBorder);
@@ -129,6 +129,12 @@ public class Island {
         }
     }
 
+    public void allPerformActions(){
+        for (Animal animal : animals){
+            animal.performActions();
+        }
+    }
+
     public void growAllPlants() {
         Random random = new Random();
         for (int i = 0; i < rows; i++) {
@@ -138,7 +144,7 @@ public class Island {
                     grid[i][j].addPlant(plant);
                     this.plants.add(plant);
                     grid[i][j].addIcon(plant.getIcon());
-                    Plant.plantCount++;
+                    Plant.plantCount.incrementAndGet();
                 }
             }
         }
@@ -152,7 +158,7 @@ public class Island {
             this.placePlant(this, plant);
             plant.getCurrentCell().addPlant(plant);
             plant.getCurrentCell().addIcon(plant.getIcon());
-            Plant.plantCount++;
+            Plant.plantCount.incrementAndGet();
         }
         System.out.println("Rain stops." + count + " plants appears.");
     }
@@ -183,5 +189,10 @@ public class Island {
                 grid[i][j].cellStatistic();
             }
         }
+    }
+
+    @Override
+    public void run() {
+        allPerformActions();
     }
 }

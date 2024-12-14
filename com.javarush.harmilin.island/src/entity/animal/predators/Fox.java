@@ -4,8 +4,10 @@ import entity.animal.Animal;
 import entity.animal.herbivores.*;
 import entity.island.Island;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Fox extends Predator{
-    public static int foxCount = 0;
+    public static AtomicInteger foxCount = new AtomicInteger(0);
 
     public Fox(Island island) {
         super(island, 8, 2, 2, 100);
@@ -13,7 +15,7 @@ public class Fox extends Predator{
         setPreyChance(Mouse.class, 90);;
         setPreyChance(Duck.class, 60);
         setPreyChance(Caterpillar.class, 40);
-        foxCount++;
+        foxCount.incrementAndGet();
     }
 
     @Override
