@@ -1,8 +1,8 @@
 package entity.animal;
 
 import catalog.Names;
-import entity.animal.herbivores.Herbivore;
-import entity.animal.predators.Predator;
+import entity.animal.herbivore.Herbivore;
+import entity.animal.predator.Predator;
 import entity.cell.Cell;
 import entity.island.Island;
 import entity.plant.Plant;
@@ -137,9 +137,9 @@ public abstract class Animal {
         this.getCurrentCell().removeAnimal(this);
         animalCount.decrementAndGet();
         if (this instanceof Predator) {
-            Predator.predatorCount--;
+            Predator.predatorCount.decrementAndGet();
         } else if (this instanceof Herbivore) {
-            Herbivore.herbivoreCount--;
+            Herbivore.herbivoreCount.decrementAndGet();
         }
     }
 

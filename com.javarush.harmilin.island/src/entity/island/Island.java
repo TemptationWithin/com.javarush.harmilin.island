@@ -1,33 +1,34 @@
 package entity.island;
 
 import entity.animal.Animal;
-import entity.animal.herbivores.Herbivore;
-import entity.animal.predators.Predator;
+import entity.animal.herbivore.*;
+import entity.animal.predator.*;
 import entity.cell.Cell;
 import entity.plant.Plant;
 import lombok.Data;
 import lombok.Getter;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Data
-public class Island implements Runnable{
+public class Island implements Runnable {
     private final int rows;
     private final int cols;
     private final Cell[][] grid;
     private List<Animal> animals;
     private List<Plant> plants;
     @Getter
-    private static final Map<String, Integer> animalLimits;
+    private static final ConcurrentHashMap<String, Integer> animalLimits;
     @Getter
-    private static final Map<String, Integer> plantLimits;
-    private final ExecutorService executorService = Executors.newCachedThreadPool();
+    private static final ConcurrentHashMap<String, Integer> plantLimits;
 
     static {
-        animalLimits = new HashMap<>();
+        animalLimits = new ConcurrentHashMap<>();
         animalLimits.put("Boar", 50);
         animalLimits.put("Buffalo", 10);
         animalLimits.put("Caterpillar", 1000);
@@ -44,7 +45,7 @@ public class Island implements Runnable{
         animalLimits.put("Fox", 30);
         animalLimits.put("Wolf", 30);
 
-        plantLimits = new HashMap<>();
+        plantLimits = new ConcurrentHashMap<>();
         plantLimits.put("Plant", 200);
     }
 
@@ -99,6 +100,10 @@ public class Island implements Runnable{
     }
 
     public synchronized void display() {
+        System.out.println("Animals: " + Animal.animalCount);
+        System.out.println("Predators: " + Predator.predatorCount);
+        System.out.println("Herbivores: " + Herbivore.herbivoreCount);
+        System.out.println("Plants: " + Plant.plantCount);
         int cellWidth = calculateMaxCellWidth();
         String horizontalBorder = "+".repeat(cellWidth * cols + cols + 1);
         System.out.println(horizontalBorder);
@@ -117,7 +122,6 @@ public class Island implements Runnable{
         for (Animal animal : animals) {
             animal.die();
         }
-        executorService.shutdown();
     }
 
     public void moveAllAnimals() {
@@ -129,13 +133,14 @@ public class Island implements Runnable{
         }
     }
 
-    public void allPerformActions(){
-        for (Animal animal : animals){
+    public void allPerformActions() {
+        for (Animal animal : animals) {
             animal.performActions();
         }
     }
 
     public void growAllPlants() {
+        System.out.println("Plants growing...");
         Random random = new Random();
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -188,6 +193,78 @@ public class Island implements Runnable{
                 System.out.print("Statistic in cell: " + "[" + i + "]" + "," + "[" + j + "]");
                 grid[i][j].cellStatistic();
             }
+        }
+    }
+
+    public void randomBegin(int animals, int plants) {
+        Random random = new Random();
+        for (int j = 0; j < animals; j++) {
+            int i = random.nextInt(animalLimits.size());
+            switch (i) {
+                case 0:{
+                    this.placeAnimal(this, new Bear(this));
+                    break;
+                }
+                case 1:{
+                    this.placeAnimal(this, new Boa(this));
+                    break;
+                }
+                case 2: {
+                    this.placeAnimal(this, new Eagle(this));
+                    break;
+                }
+                case 3: {
+                    this.placeAnimal(this, new Fox(this));
+                    break;
+                }
+                case 4: {
+                    this.placeAnimal(this, new Wolf(this));
+                    break;
+                }
+                case 5: {
+                    this.placeAnimal(this, new Boar(this));
+                    break;
+                }
+                case 6: {
+                    this.placeAnimal(this, new Buffalo(this));
+                    break;
+                }
+                case 7: {
+                    this.placeAnimal(this, new Caterpillar(this));
+                    break;
+                }
+                case 8: {
+                    this.placeAnimal(this, new Deer(this));
+                    break;
+                }
+                case 9: {
+                    this.placeAnimal(this, new Duck(this));
+                    break;
+                }
+                case 10: {
+                    this.placeAnimal(this, new Goat(this));
+                    break;
+                }
+                case 11: {
+                    this.placeAnimal(this, new Horse(this));
+                    break;
+                }
+                case 12: {
+                    this.placeAnimal(this, new Mouse(this));
+                    break;
+                }
+                case 13: {
+                    this.placeAnimal(this, new Rabbit(this));
+                    break;
+                }
+                case 14: {
+                    this.placeAnimal(this, new Sheep(this));
+                    break;
+                }
+            }
+        }
+        for (int j = 0; j < plants; j++) {
+            this.placePlant(this, new Plant(this));
         }
     }
 

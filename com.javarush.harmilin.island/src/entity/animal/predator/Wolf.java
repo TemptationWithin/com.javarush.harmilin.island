@@ -1,7 +1,7 @@
-package entity.animal.predators;
+package entity.animal.predator;
 
 import entity.animal.Animal;
-import entity.animal.herbivores.*;
+import entity.animal.herbivore.*;
 import entity.island.Island;
 
 import java.util.concurrent.atomic.AtomicInteger;

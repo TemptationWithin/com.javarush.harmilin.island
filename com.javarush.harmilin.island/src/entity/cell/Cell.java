@@ -18,26 +18,24 @@ public class Cell {
     private static final Map<String, Integer> plantLimits = Island.getPlantLimits();
 
     public synchronized void addAnimal(Animal animal) {
-        long count = animals.stream().filter(a -> a.getClass() == animal.getClass()).count();
+        long count = animals.parallelStream().filter(a -> a.getClass() == animal.getClass()).count();
         int maxCount = getMaxAnimalsPerCell(animal.getClass());
         if (count <= maxCount) {
             this.animals.add(animal);
             animal.setCurrentCell(this);
             animal.getIsland().getAnimals().add(animal);
-            Animal.animalCount.incrementAndGet();
         } else {
             System.out.println("Cell is full for " + animal.getClass().getSimpleName());
         }
     }
 
     public synchronized void addPlant(Plant plant) {
-        long count = plants.stream().filter(a -> a.getClass() == plant.getClass()).count();
+        long count = plants.parallelStream().filter(a -> a.getClass() == plant.getClass()).count();
         int maxCount = getMaxPlantsPerCell(plant.getClass());
         if (count <= maxCount) {
             plants.add(plant);
             plant.setCurrentCell(this);
             plant.getIsland().getPlants().add(plant);
-            Plant.plantCount.incrementAndGet();
         } else {
             System.out.println("Cell is full for " + plant.getClass().getSimpleName());
         }
@@ -73,7 +71,7 @@ public class Cell {
             Iterator<String> animalIterator = animalIcons.iterator();
             while (animalIterator.hasNext()) {
                 String icon = animalIterator.next();
-                boolean isAlive = animals.stream()
+                boolean isAlive = animals.parallelStream()
                         .anyMatch(animal -> animal.getIcon().equals(icon) && animal.isAlive()
                                 && !animal.getIcon().equals("💀"));
                 if (!isAlive) {
@@ -84,7 +82,7 @@ public class Cell {
             while (plantIterator.hasNext()){
                 while (plantIterator.hasNext()){
                     String icon = plantIterator.next();
-                    boolean isPlantAlive = plants.stream().anyMatch(s -> s.getIcon().equals(icon) && s.getWeight() > 0);
+                    boolean isPlantAlive = plants.parallelStream().anyMatch(s -> s.getIcon().equals(icon) && s.getWeight() > 0);
                     if (!isPlantAlive){
                         plantIterator.remove();
                     }

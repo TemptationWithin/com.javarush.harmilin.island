@@ -1,4 +1,4 @@
-package entity.animal.predators;
+package entity.animal.predator;
 
 import entity.animal.Animal;
 import entity.island.Island;
