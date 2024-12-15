@@ -45,6 +45,7 @@ public class Main {
 
             if (day == dayLimitation) {
                 executorHandler.shutdownAllExecutors();
+                Timer.sleep(5000);
                 island.display();
                 dayLimitation = dayLimitation + Validator.optionsForContinue(console, island);
                 executorHandler.restartExecutors();

@@ -50,18 +50,17 @@ public abstract class Animal {
         this.eatPlants(getCurrentCell());
     }
 
-    protected void eatAnimals(Cell cell) {
+    protected synchronized void eatAnimals(Cell cell) {
         List<Animal> potentialPrey = cell.getAnimals();
         Random random = new Random();
         if (getEnergy() <= 70) {
             isHungry = true;
         }
-        synchronized (cell) {
             for (Animal prey : potentialPrey) {
                 if (prey == this) continue;
                 Integer chance = getPreyChances().get(prey.getClass());
                 if (chance != null && random.nextInt(100) < chance) {
-                    System.out.println(this.getIcon() + this + " successfully ate " + prey.getIcon() + prey +
+                    System.out.println(this + " successfully ate " + prey +
                             " at cell: " + "[" + this.getX_Coordinate() + ", " + this.getY_Coordinate() + "]");
                     prey.die();
                     increaseEnergy(Math.min(100, getEnergy() + 40));
@@ -69,12 +68,10 @@ public abstract class Animal {
                     return;
                 }
             }
-        }
-        System.out.println(this.getIcon() + " found no prey to eat.");
+        System.out.println(this + " found no prey to eat.");
     }
 
-    private void eatPlants(Cell cell) {
-        synchronized (cell) {
+    private synchronized void eatPlants(Cell cell) {
             if (getEnergy() <= 70) {
                 isHungry = true;
             }
@@ -89,10 +86,9 @@ public abstract class Animal {
                     increaseEnergy(Math.min(100, getEnergy() + 10));
                     isHungry = false;
                 } else {
-                    System.out.println(this.getIcon() + " found no plants around.");
+                    System.out.println(this + " found no plants around.");
                 }
             }
-        }
     }
 
     public synchronized void reproduce() {
@@ -111,13 +107,12 @@ public abstract class Animal {
                         cell.addAnimal(createOffspring());
                         this.decreaseEnergy(10);
                         partner.decreaseEnergy(10);
-                        System.out.println(this + "(" + this.sex + ")" + " reproduced with " +
-                                partner + "(" + partner.sex + ")");
+                        System.out.println(this + " reproduced with " + partner);
                     }
                     return;
                 }
             }
-            System.out.println(this.getIcon() + "(" + this.sex + ")" + " found no partner to reproduce.");
+            System.out.println(this + " found no partner to reproduce.");
         }
     }
 
@@ -170,49 +165,53 @@ public abstract class Animal {
             int oldY = this.getY_Coordinate();
             int moveDistance = random.nextInt(getMaxSpeed()) + 1;
             int direction = random.nextInt(4);
+            int newX = oldX;
+            int newY = oldY;
             String dir = "";
             switch (direction) {
                 case 0:
                     if (x_Coordinate - moveDistance >= 0) {
-                        x_Coordinate -= moveDistance;
+                        newX = oldX - moveDistance;
                         dir = "up";
                     }
                     break;
                 case 1:
                     if (x_Coordinate + moveDistance < rows) {
-                        x_Coordinate += moveDistance;
+                        newX = oldX + moveDistance;
                         dir = "down";
                     }
                     break;
                 case 2:
                     if (y_Coordinate - moveDistance >= 0) {
-                        y_Coordinate -= moveDistance;
+                        newY = oldY - moveDistance;
                         dir = "left";
                     }
                     break;
                 case 3:
                     if (y_Coordinate + moveDistance < cols) {
-                        y_Coordinate += moveDistance;
+                        newY = oldY + moveDistance;
                         dir = "right";
                     }
                     break;
             }
-            if (oldX != x_Coordinate && oldY != y_Coordinate){
-                this.decreaseEnergy(getMaxSpeed() * 2);
-                if (this.getEnergy() <= 0) {
-                    this.die();
-                    System.out.println(this + "died of exhaustion >>" + "💀");
-                } else {
-                    this.getCurrentCell().removeAnimal(this);
-                    this.setCurrentCell(island.getCellByCoordinates(x_Coordinate, y_Coordinate));
-                    this.getCurrentCell().getAnimals().add(this);
-                    this.getCurrentCell().addIcon(this.getIcon());
-                    island.cleanUp();
-                    System.out.println(this + " with max speed: " + this.getMaxSpeed() +
-                            " moved" + dir + ", from " + "[" + oldX + ", " + oldY + "]" +
-                            " to " + "[" + this.getX_Coordinate() + ", " + this.getY_Coordinate() + "]");
-                }
-            } else System.out.println(this + " cannot escape from the Island.");
+            if (newX == oldX && newY == oldY) {
+                System.out.println(this + " cannot move out of bounds.");
+                return;
+            }
+            this.decreaseEnergy(getMaxSpeed() * 2);
+            if (this.getEnergy() <= 0) {
+                this.die();
+                System.out.println(this + "died of exhaustion >>" + "💀");
+            } else {
+                this.getCurrentCell().removeAnimal(this);
+                this.setCurrentCell(island.getCellByCoordinates(x_Coordinate, y_Coordinate));
+                this.getCurrentCell().getAnimals().add(this);
+                this.getCurrentCell().addIcon(this.getIcon());
+                island.cleanUp();
+                System.out.println(this + " with max speed: " + this.getMaxSpeed() +
+                        " moved " + dir + ", from " + "[" + oldX + ", " + oldY + "]" +
+                        " to " + "[" + this.getX_Coordinate() + ", " + this.getY_Coordinate() + "]");
+            }
         }
     }
 
