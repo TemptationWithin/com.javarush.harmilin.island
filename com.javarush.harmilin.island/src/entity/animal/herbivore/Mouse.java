@@ -11,6 +11,7 @@ public class Mouse extends Herbivore{
     public Mouse(Island island) {
         super(island,0.05, 1, 0.01, 100);
         setPreyChance(Caterpillar.class, 90);
+        setSpeed(getMaxSpeed());
         mouseCount.incrementAndGet();
     }
 

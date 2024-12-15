@@ -11,6 +11,7 @@ public class Caterpillar extends Herbivore implements NotMovable {
 
     public Caterpillar(Island island) {
         super(island,0.01, 0, 0, 100);
+        setSpeed(getMaxSpeed());
         caterpillarCount.incrementAndGet();
     }
 

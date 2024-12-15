@@ -26,11 +26,13 @@ public class Main {
         System.out.println("Welcome to hungry games. Lets start...");
         //Timer.funnyPreparing();
         Timer.sleep(500);
+        island.changeWeather();
         int day = 0;
         island.display();
 
         while (day < dayLimitation) {
             synchronized (System.out){
+                island.changeWeather();
                 System.out.println("+" + "---".repeat(2) + " +");
                 System.out.println("|DAY #" + day + " |");
                 System.out.println("+" + "___".repeat(2) + " +");
@@ -38,7 +40,7 @@ public class Main {
             Timer.sleep(2000);
             executorHandler.getExecutorService().submit(island::cleanUp);
             executorHandler.getExecutorService().submit(island::allPerformActions);
-            executorHandler.getScheduler().scheduleWithFixedDelay(island::growAllPlants, 0, 10, TimeUnit.SECONDS);
+            executorHandler.getScheduler().scheduleWithFixedDelay(island::growAllPlants, 0, 20, TimeUnit.SECONDS);
             //executorHandler.getScheduler().scheduleWithFixedDelay(island::moveAllAnimals, 0, 10, TimeUnit.SECONDS);
             Timer.sleep(100);
             day++;

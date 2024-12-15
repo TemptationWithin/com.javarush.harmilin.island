@@ -20,6 +20,7 @@ public class Wolf extends Predator{
         setPreyChance(Boar.class, 15);
         setPreyChance(Buffalo.class, 10);
         setPreyChance(Duck.class, 40);
+        setSpeed(getMaxSpeed());
         wolfCount.incrementAndGet();
     }
 

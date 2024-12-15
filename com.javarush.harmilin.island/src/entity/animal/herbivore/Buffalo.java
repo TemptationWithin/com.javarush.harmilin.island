@@ -10,6 +10,7 @@ public class Buffalo extends Herbivore{
 
     public Buffalo(Island island) {
         super(island,700, 3, 100, 100);
+        setSpeed(getMaxSpeed());
         buffaloCount.incrementAndGet();
     }
 

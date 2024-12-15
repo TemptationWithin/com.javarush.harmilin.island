@@ -10,6 +10,7 @@ public class Horse extends Herbivore{
 
     public Horse(Island island) {
         super(island, 400, 4, 60, 100);
+        setSpeed(getMaxSpeed());
         horseCount.incrementAndGet();
     }
 

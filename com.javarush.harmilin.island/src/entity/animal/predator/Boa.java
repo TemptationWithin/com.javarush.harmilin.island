@@ -15,6 +15,7 @@ public class Boa extends Predator{
         setPreyChance(Rabbit.class, 20);
         setPreyChance(Mouse.class, 40);
         setPreyChance(Duck.class, 10);
+        setSpeed(getMaxSpeed());
         boaCount.incrementAndGet();
     }
 

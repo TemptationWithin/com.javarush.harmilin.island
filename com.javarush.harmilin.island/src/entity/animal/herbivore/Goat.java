@@ -10,6 +10,7 @@ public class Goat extends Herbivore{
 
     public Goat(Island island) {
         super(island,70, 3, 10, 100);
+        setSpeed(getMaxSpeed());
         goatCount.incrementAndGet();
     }
 

@@ -3,6 +3,10 @@ package entity.island;
 import entity.animal.Animal;
 import entity.animal.herbivore.*;
 import entity.animal.predator.*;
+import entity.island.weather.RainWeather;
+import entity.island.weather.SnowWeather;
+import entity.island.weather.SunnyWeather;
+import entity.island.weather.Weather;
 import entity.plant.Plant;
 import lombok.Data;
 import lombok.Getter;
@@ -18,6 +22,7 @@ public class Island implements Runnable {
     private final Cell[][] grid;
     private List<Animal> animals;
     private List<Plant> plants;
+    private Weather currentWeather;
     @Getter
     private static final ConcurrentHashMap<String, Integer> animalLimits;
     @Getter
@@ -115,7 +120,7 @@ public class Island implements Runnable {
         int i = 0;
         for (Animal animal : animals) {
             animal.die();
-            if (i <= 4){
+            if (i <= 4) {
                 System.out.print("God killed: " + animal + "|");
                 i++;
             } else {
@@ -123,8 +128,8 @@ public class Island implements Runnable {
                 i = 0;
             }
         }
-        System.out.println("God killed all " + this.plants.size() +  " plants.|");
-        for (Plant plant : plants){
+        System.out.println("God killed all " + this.plants.size() + " plants.|");
+        for (Plant plant : plants) {
             plant.die();
         }
         System.out.println("The Island is sterile again");
@@ -147,7 +152,7 @@ public class Island implements Runnable {
     }
 
     public void growAllPlants() {
-        System.out.println("--".repeat(5)+"🌱"+"🌱"+"Plants are growing..."+"🌱"+"🌱"+ "--".repeat(5));
+        System.out.println("--".repeat(5) + "🌱" + "🌱" + "Plants are growing..." + "🌱" + "🌱" + "--".repeat(5));
         Random random = new Random();
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -155,22 +160,34 @@ public class Island implements Runnable {
                     Plant plant = getPlants().get(random.nextInt(grid[i][j].getPlants().size()));
                     grid[i][j].addPlant(plant);
                     Plant.plantCount.incrementAndGet();
+
+                    switch (random.nextInt(100)) {
+                        case 0: {
+                            caterpillarsAppearance(grid[i][j]);
+                            break;
+                        }
+                    }
+
                 }
             }
         }
     }
 
-    public void growAfterRain() {
+    public void caterpillarsAppearance(Cell cell) {
+        System.out.println("--".repeat(5) + "🐛" + "🐛" + "🐛" +
+                "New caterpillars begin to crawl out of the plants" +
+                "🐛" + "🐛" + "--".repeat(5));
         Random random = new Random();
-        int count = random.nextInt(1000);
-        for (int i = 0; i < count; i++) {
-            Plant plant = new Plant(this);
-            this.placePlant(this, plant);
-            plant.getCurrentCell().addPlant(plant);
-            plant.getCurrentCell().addIcon(plant.getIcon());
-            Plant.plantCount.incrementAndGet();
+        for (int i = 1; i < random.nextInt(4) + 1; i++) {
+            Caterpillar caterpillar = new Caterpillar(this);
+            caterpillar.setCurrentCell(cell);
+            cell.getAnimals().add(caterpillar);
+            this.getAnimals().add(caterpillar);
+            cell.getAnimalIcons().add(caterpillar.getIcon());
+            System.out.println("--".repeat(5) +
+                    caterpillar + " was added to" + caterpillar.coordinatesToString() +
+                    "--".repeat(5));
         }
-        System.out.println("Rain stops." + count + " plants appears.");
     }
 
     public void cleanUp() {
@@ -276,12 +293,35 @@ public class Island implements Runnable {
         }
     }
 
-    public Cell getCellByCoordinates(int x, int y){
-        if ((x < getRows() && y < getCols() && (x >= 0 && y >= 0))){
+    public Cell getCellByCoordinates(int x, int y) {
+        if ((x < getRows() && y < getCols() && (x >= 0 && y >= 0))) {
             return grid[x][y];
         }
         System.out.println("There is no grid with those coordinates");
         return null;
+    }
+
+    public void changeWeather(){
+        Random random = new Random();
+        int weatherType = random.nextInt(11);
+        switch (weatherType){
+            case 0, 1, 2, 3, 4, 5, 6, 7 -> currentWeather = new SunnyWeather();
+            case 8, 9 -> currentWeather = new RainWeather();
+            case 10 -> currentWeather = new SnowWeather();
+        }
+        System.out.println(currentWeather);
+        applyWeatherEffects();
+    }
+
+    public void applyWeatherEffects(){
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                for (Animal animal : grid[i][j].getAnimals()){
+                    currentWeather.affectAnimal(animal);
+                }
+            }
+        }
+        currentWeather.affectPlants(this);
     }
 
     @Override

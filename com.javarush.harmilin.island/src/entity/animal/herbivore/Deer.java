@@ -10,6 +10,7 @@ public class Deer extends Herbivore{
 
     public Deer(Island island) {
         super(island,300, 4, 50, 100);
+        setSpeed(getMaxSpeed());
         deerCount.incrementAndGet();
     }
 

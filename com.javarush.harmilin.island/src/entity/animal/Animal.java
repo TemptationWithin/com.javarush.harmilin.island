@@ -5,6 +5,7 @@ import entity.animal.herbivore.Herbivore;
 import entity.animal.predator.Predator;
 import entity.island.Cell;
 import entity.island.Island;
+import entity.island.weather.SnowWeather;
 import entity.plant.Plant;
 import lombok.Data;
 
@@ -18,6 +19,7 @@ public abstract class Animal {
     public static AtomicInteger animalCount = new AtomicInteger(0);
 
     private final int maxSpeed;
+    private int speed;
     private final double maxWeight;
     private final double foodRequired;
     private int x_Coordinate, y_Coordinate;
@@ -44,10 +46,13 @@ public abstract class Animal {
         } else this.name = Names.getRandomMaleName();
         animalCount.incrementAndGet();
     }
+    protected abstract Animal createOffspring();
 
     protected synchronized void eat() {
         this.eatAnimals(getCurrentCell());
+        this.decreaseEnergy(Math.min(0, getEnergy()-4));
         this.eatPlants(getCurrentCell());
+        this.decreaseEnergy(Math.min(0, getEnergy()-2));
     }
 
     protected synchronized void eatAnimals(Cell cell) {
@@ -61,7 +66,7 @@ public abstract class Animal {
                 Integer chance = getPreyChances().get(prey.getClass());
                 if (chance != null && random.nextInt(100) < chance) {
                     System.out.println(this + " successfully ate " + prey +
-                            " at cell: " + "[" + this.getX_Coordinate() + ", " + this.getY_Coordinate() + "]");
+                            " in cell: " + this.coordinatesToString());
                     prey.die();
                     increaseEnergy(Math.min(100, getEnergy() + 40));
                     isHungry = false;
@@ -81,12 +86,12 @@ public abstract class Animal {
                 if (!plants.isEmpty()) {
                     int preyPlantIndex = random.nextInt(plants.size());
                     System.out.println(this + " ate " + plants.get(preyPlantIndex).toString() +
-                            " at cell: " + "[" + this.getX_Coordinate() + ", " + this.getY_Coordinate() + "]");
+                            " in cell: " + this.coordinatesToString());
                     plants.get(preyPlantIndex).die();
                     increaseEnergy(Math.min(100, getEnergy() + 10));
                     isHungry = false;
                 } else {
-                    System.out.println(this + " found no plants around.");
+                    System.out.println(this + " found no plants in cell:" + this.coordinatesToString()) ;
                 }
             }
     }
@@ -105,18 +110,17 @@ public abstract class Animal {
                     Animal offspring = createOffspring();
                     if (offspring != null) {
                         cell.addAnimal(createOffspring());
-                        this.decreaseEnergy(10);
-                        partner.decreaseEnergy(10);
-                        System.out.println(this + " reproduced with " + partner);
+                        this.decreaseEnergy(Math.max(0, getEnergy()-10));
+                        partner.decreaseEnergy(Math.max(0, getEnergy()-10));
+                        System.out.println(this + " reproduced with " + partner + " in cell:" + this.coordinatesToString());
                     }
                     return;
                 }
             }
-            System.out.println(this + " found no partner to reproduce.");
+            this.decreaseEnergy(Math.max(0, getEnergy()-5));
+            System.out.println(this + " found no partner to reproduce in cell:" + this.coordinatesToString());
         }
     }
-
-    protected abstract Animal createOffspring();
 
     public boolean isAlive() {
         return isAlive;
@@ -141,11 +145,20 @@ public abstract class Animal {
     }
 
     public void performActions() {
+        if (this instanceof CanSleepAtWinter && getIsland().getCurrentWeather() instanceof SnowWeather){
+            return;
+        }
         Random random = new Random();
         int action = random.nextInt(3);
         switch (action) {
             case 0 -> eat();
-            case 1 -> move(island.getRows(), island.getCols());
+            case 1 -> {
+                if (!(this instanceof NotMovable)){
+                    move(island.getRows(), island.getCols());
+                } else{
+                    performActions();
+                }
+            }
             case 2 -> reproduce();
         }
     }
@@ -163,7 +176,7 @@ public abstract class Animal {
             Random random = new Random();
             int oldX = this.getX_Coordinate();
             int oldY = this.getY_Coordinate();
-            int moveDistance = random.nextInt(getMaxSpeed()) + 1;
+            int moveDistance = random.nextInt(getSpeed()) + 1;
             int direction = random.nextInt(4);
             int newX = oldX;
             int newY = oldY;
@@ -198,7 +211,7 @@ public abstract class Animal {
                 System.out.println(this + " cannot move out of bounds.");
                 return;
             }
-            this.decreaseEnergy(getMaxSpeed() * 2);
+            this.decreaseEnergy(getSpeed() * 2);
             if (this.getEnergy() <= 0) {
                 this.die();
                 System.out.println(this + "died of exhaustion >>" + "💀");
@@ -210,7 +223,7 @@ public abstract class Animal {
                 island.cleanUp();
                 System.out.println(this + " with max speed: " + this.getMaxSpeed() +
                         " moved " + dir + ", from " + "[" + oldX + ", " + oldY + "]" +
-                        " to " + "[" + this.getX_Coordinate() + ", " + this.getY_Coordinate() + "]");
+                        " to " + coordinatesToString());
             }
         }
     }
@@ -224,5 +237,15 @@ public abstract class Animal {
         return this.getIcon() + this.getName() +
                 "(" + this.getClass().getSimpleName() + "(" + this.getSex() + "))" +
                 ". Energy: " + this.getEnergy() + " ";
+    }
+
+    public String coordinatesToString(){
+        return " [" + this.getX_Coordinate() + ", " + this.getY_Coordinate() + "] ";
+    }
+
+    public void setCurrentCell(Cell currentCell) {
+        this.currentCell = currentCell;
+        this.x_Coordinate = currentCell.getX_Coordinate();
+        this.y_Coordinate = currentCell.getY_Coordinate();
     }
 }

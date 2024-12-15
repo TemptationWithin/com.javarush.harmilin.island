@@ -13,6 +13,7 @@ public class Boar extends Herbivore{
         super(island,400, 2, 50, 100);
         setPreyChance(Mouse.class, 50);
         setPreyChance(Caterpillar.class, 90);
+        setSpeed(getMaxSpeed());
         boarCount.incrementAndGet();
     }
 

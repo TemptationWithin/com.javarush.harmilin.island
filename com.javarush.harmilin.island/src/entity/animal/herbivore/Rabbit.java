@@ -10,6 +10,7 @@ public class Rabbit extends Herbivore{
 
     public Rabbit(Island island) {
         super(island,2, 2, 0.45, 100);
+        setSpeed(getMaxSpeed());
         rabbitCount.incrementAndGet();
     }
 

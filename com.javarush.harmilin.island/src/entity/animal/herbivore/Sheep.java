@@ -10,6 +10,7 @@ public class Sheep extends Herbivore{
 
     public Sheep(Island island) {
         super(island, 70, 3, 15, 100);
+        setSpeed(getMaxSpeed());
         sheepCount.incrementAndGet();
     }
 
