@@ -26,7 +26,8 @@ public class Main {
         System.out.println("Welcome to hungry games. Lets start...");
         //Timer.funnyPreparing();
         Timer.sleep(500);
-        int day = 1;
+        int day = 0;
+        island.display();
 
         while (day < dayLimitation) {
             synchronized (System.out){
@@ -34,33 +35,18 @@ public class Main {
                 System.out.println("|DAY #" + day + " |");
                 System.out.println("+" + "___".repeat(2) + " +");
             }
-
+            Timer.sleep(2000);
             executorHandler.getExecutorService().submit(island::cleanUp);
+            executorHandler.getExecutorService().submit(island::allPerformActions);
             executorHandler.getScheduler().scheduleWithFixedDelay(island::growAllPlants, 0, 10, TimeUnit.SECONDS);
-            executorHandler.getScheduler().scheduleWithFixedDelay(island::moveAllAnimals, 0, 60, TimeUnit.SECONDS);
-            executorHandler.getScheduler().scheduleWithFixedDelay(island::display, 0, 4000, TimeUnit.MILLISECONDS);
-
-            Timer.sleep(5000);
-
+            //executorHandler.getScheduler().scheduleWithFixedDelay(island::moveAllAnimals, 0, 10, TimeUnit.SECONDS);
+            Timer.sleep(100);
             day++;
 
             if (day == dayLimitation) {
                 executorHandler.shutdownAllExecutors();
-                System.out.println("\n==================== PAUSED ====================");
-                int firstOption = Validator.getValidatedIntLimitInput(console, "Would you like to continue? \n1. - Yes." +
-                        "\nAny other number will stop simulation");
-                if (firstOption == 1) {
-                    island.statisticPerCell();
-                    int secondOptionInput = Validator.getValidatedIntLimitInput(console, "Do you want to add more Animals and plants? \nIf Yes - press 1.");
-                    if (secondOptionInput == 1) {
-                        System.out.println("You have to add at least 1 animal and 1 plant!");
-                        int amountOfNewAnimals = Validator.getValidatedIntLimitInput(console, "How many animals would you like to add to your island?");
-                        int amountOfNewPlants = Validator.getValidatedIntLimitInput(console, "And many plants?");
-                        island.randomBegin(amountOfNewAnimals, amountOfNewPlants);
-                    }
-                    int additionalDays = Validator.getValidatedIntLimitInput(console, "How many days would you like to add?");
-                    dayLimitation = dayLimitation + additionalDays;
-                }
+                island.display();
+                dayLimitation = dayLimitation + Validator.optionsForContinue(console, island);
                 executorHandler.restartExecutors();
             }
         }

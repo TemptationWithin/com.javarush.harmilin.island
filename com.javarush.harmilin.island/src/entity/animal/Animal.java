@@ -39,7 +39,7 @@ public abstract class Animal {
         this.foodRequired = foodRequired;
         this.energy = initialEnergy;
         this.sex = new Random().nextBoolean() ? 'F' : 'M';
-        if (sex == 'F'){
+        if (sex == 'F') {
             this.name = Names.getRandomFemaleName();
         } else this.name = Names.getRandomMaleName();
         animalCount.incrementAndGet();
@@ -61,7 +61,8 @@ public abstract class Animal {
                 if (prey == this) continue;
                 Integer chance = getPreyChances().get(prey.getClass());
                 if (chance != null && random.nextInt(100) < chance) {
-                    System.out.println(this.getIcon() + " successfully ate " + prey.getIcon());
+                    System.out.println(this.getIcon() + this + " successfully ate " + prey.getIcon() + prey +
+                            " at cell: " + "[" + this.getX_Coordinate() + ", " + this.getY_Coordinate() + "]");
                     prey.die();
                     increaseEnergy(Math.min(100, getEnergy() + 40));
                     isHungry = false;
@@ -82,7 +83,8 @@ public abstract class Animal {
                 Random random = new Random();
                 if (!plants.isEmpty()) {
                     int preyPlantIndex = random.nextInt(plants.size());
-                    System.out.println(this.getIcon() + " ate " + plants.get(preyPlantIndex).getIcon());
+                    System.out.println(this + " ate " + plants.get(preyPlantIndex).toString() +
+                            " at cell: " + "[" + this.getX_Coordinate() + ", " + this.getY_Coordinate() + "]");
                     plants.get(preyPlantIndex).die();
                     increaseEnergy(Math.min(100, getEnergy() + 10));
                     isHungry = false;
@@ -109,7 +111,8 @@ public abstract class Animal {
                         cell.addAnimal(createOffspring());
                         this.decreaseEnergy(10);
                         partner.decreaseEnergy(10);
-                        System.out.println(this.getIcon() + "(" + this.sex + ")" + " reproduced with " + partner.getIcon() + "(" + partner.sex + ")");
+                        System.out.println(this + "(" + this.sex + ")" + " reproduced with " +
+                                partner + "(" + partner.sex + ")");
                     }
                     return;
                 }
@@ -163,36 +166,53 @@ public abstract class Animal {
     public synchronized void move(int rows, int cols) {
         if (!(this instanceof NotMovable && this.isAlive())) {
             Random random = new Random();
+            int oldX = this.getX_Coordinate();
+            int oldY = this.getY_Coordinate();
             int moveDistance = random.nextInt(getMaxSpeed()) + 1;
             int direction = random.nextInt(4);
+            String dir = "";
             switch (direction) {
                 case 0:
                     if (x_Coordinate - moveDistance >= 0) {
                         x_Coordinate -= moveDistance;
+                        dir = "up";
                     }
                     break;
                 case 1:
                     if (x_Coordinate + moveDistance < rows) {
                         x_Coordinate += moveDistance;
+                        dir = "down";
                     }
                     break;
                 case 2:
                     if (y_Coordinate - moveDistance >= 0) {
                         y_Coordinate -= moveDistance;
+                        dir = "left";
                     }
                     break;
                 case 3:
                     if (y_Coordinate + moveDistance < cols) {
                         y_Coordinate += moveDistance;
+                        dir = "right";
                     }
                     break;
             }
-            this.decreaseEnergy(getMaxSpeed() * 2);
-            if (this.getEnergy() <= 0) {
-                this.die();
-                System.out.println(this + "died of exhaustion.");
-            }
-            //System.out.println(getIcon() + " moved to cell: " + x_Coordinate + ", " + y_Coordinate);
+            if (oldX != x_Coordinate && oldY != y_Coordinate){
+                this.decreaseEnergy(getMaxSpeed() * 2);
+                if (this.getEnergy() <= 0) {
+                    this.die();
+                    System.out.println(this + "died of exhaustion >>" + "💀");
+                } else {
+                    this.getCurrentCell().removeAnimal(this);
+                    this.setCurrentCell(island.getCellByCoordinates(x_Coordinate, y_Coordinate));
+                    this.getCurrentCell().getAnimals().add(this);
+                    this.getCurrentCell().addIcon(this.getIcon());
+                    island.cleanUp();
+                    System.out.println(this + " with max speed: " + this.getMaxSpeed() +
+                            " moved" + dir + ", from " + "[" + oldX + ", " + oldY + "]" +
+                            " to " + "[" + this.getX_Coordinate() + ", " + this.getY_Coordinate() + "]");
+                }
+            } else System.out.println(this + " cannot escape from the Island.");
         }
     }
 
@@ -202,7 +222,8 @@ public abstract class Animal {
 
     @Override
     public String toString() {
-        return this.getIcon() + this.getName() + "(" + this.getClass().getSimpleName() + "(" + this.getSex() + "))" + ". Energy: " + this.getEnergy() + " ";
+        return this.getIcon() + this.getName() +
+                "(" + this.getClass().getSimpleName() + "(" + this.getSex() + "))" +
+                ". Energy: " + this.getEnergy() + " ";
     }
-
 }

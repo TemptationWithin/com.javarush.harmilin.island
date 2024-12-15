@@ -1,5 +1,7 @@
 package handler;
 
+import entity.island.Island;
+
 import java.util.Scanner;
 
 public class Validator {
@@ -38,5 +40,23 @@ public class Validator {
                 scanner.next();
             }
         }
+    }
+
+    public static int optionsForContinue(Scanner console, Island island){
+        System.out.println("\n==================== PAUSED ====================");
+        int firstOption = Validator.getValidatedIntLimitInput(console, "Would you like to continue? \n1. - Yes." +
+                "\nAny other number will stop simulation");
+        if (firstOption == 1) {
+            island.statisticPerCell();
+            int secondOptionInput = Validator.getValidatedIntLimitInput(console, "Do you want to add more Animals and plants? \nIf Yes - press 1.");
+            if (secondOptionInput == 1) {
+                System.out.println("You have to add at least 1 animal and 1 plant!");
+                int amountOfNewAnimals = Validator.getValidatedIntLimitInput(console, "How many animals would you like to add to your island?");
+                int amountOfNewPlants = Validator.getValidatedIntLimitInput(console, "And many plants?");
+                island.randomBegin(amountOfNewAnimals, amountOfNewPlants);
+            }
+            return Validator.getValidatedIntLimitInput(console, "How many days would you like to add?");
+        }
+        return 0;
     }
 }

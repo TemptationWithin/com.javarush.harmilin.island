@@ -1,7 +1,6 @@
 package entity.island;
 
 import entity.animal.Animal;
-import entity.island.Island;
 import entity.plant.Plant;
 import lombok.Data;
 
@@ -16,6 +15,12 @@ public class Cell {
     private final List<Plant> plants = new CopyOnWriteArrayList<>();
     private static final Map<String, Integer> limits = Island.getAnimalLimits();
     private static final Map<String, Integer> plantLimits = Island.getPlantLimits();
+    private int x_Coordinate, y_Coordinate;
+
+    public Cell(int x_Coordinate, int y_Coordinate) {
+        this.x_Coordinate = x_Coordinate;
+        this.y_Coordinate = y_Coordinate;
+    }
 
     public synchronized void addAnimal(Animal animal) {
         long count = animals.parallelStream().filter(a -> a.getClass() == animal.getClass()).count();
@@ -33,8 +38,9 @@ public class Cell {
         long count = plants.parallelStream().filter(a -> a.getClass() == plant.getClass()).count();
         int maxCount = getMaxPlantsPerCell(plant.getClass());
         if (count <= maxCount) {
-            plants.add(plant);
+            this.plants.add(plant);
             plant.setCurrentCell(this);
+            plant.getCurrentCell().addIcon(plant.getIcon());
             plant.getIsland().getPlants().add(plant);
         } else {
             System.out.println("Cell is full for " + plant.getClass().getSimpleName());
@@ -78,28 +84,28 @@ public class Cell {
                     animalIterator.remove();
                 }
             }
+        }
+        synchronized (plantIcons) {
             Iterator<String> plantIterator = plantIcons.iterator();
-            while (plantIterator.hasNext()){
-                while (plantIterator.hasNext()){
-                    String icon = plantIterator.next();
-                    boolean isPlantAlive = plants.parallelStream().anyMatch(s -> s.getIcon().equals(icon) && s.getWeight() > 0);
-                    if (!isPlantAlive){
-                        plantIterator.remove();
-                    }
+            while (plantIterator.hasNext()) {
+                String icon = plantIterator.next();
+                boolean isPlantAlive = plants.parallelStream().anyMatch(s -> s.getIcon().equals(icon) && s.isAlive());
+                if (!isPlantAlive) {
+                    plantIterator.remove();
                 }
             }
         }
     }
 
     public boolean isEmpty() {
-        return animalIcons.isEmpty();
+        return animalIcons.isEmpty() && plantIcons.isEmpty();
     }
 
     public boolean hasPlants() {
         return !plants.isEmpty();
     }
 
-    public String getFormattedContent() {
+    public synchronized String getFormattedContent() {
         if (isEmpty()) {
             return "";
         }
@@ -116,18 +122,25 @@ public class Cell {
     }
 
     public synchronized void cellStatistic() {
-        System.out.println(" Animals: "
-                + this.getAnimals().size()
-                + ". Plants: "
-                + this.getPlants().size());
-        if (!animals.isEmpty()) {
-            animals.forEach(s -> System.out.print(s.toString() + ", "));
+        if (!this.cellIsEmpty()) {
+            System.out.println(" Animals: " + this.getAnimals().size()
+                    + ". Plants: " + this.getPlants().size());
+            if (!animals.isEmpty()) {
+                animals.parallelStream().forEach(s -> System.out.print(s.toString() + ", "));
+            }
+            System.out.print("\n");
+            if (!plants.isEmpty()) {
+                plants.parallelStream().forEach(s -> System.out.print(s.toString() + ", "));
+            }
+            System.out.println("\n" + "---".repeat(100));
+        } else {
+            System.out.print(" is empty.");
+            System.out.print("\n" + "---".repeat(100) +"\n");
         }
-        System.out.print("\n");
-        if (!plants.isEmpty()) {
-            plants.forEach(s -> System.out.print(s.toString() + ", "));
-        }
-        plants.forEach(s -> System.out.print(s.toString() + ", "));
-        System.out.println("\n" + "---".repeat(100));
+    }
+
+
+    private boolean cellIsEmpty() {
+        return animals.isEmpty() && plants.isEmpty();
     }
 }

@@ -57,7 +57,7 @@ public class Island implements Runnable {
     private void initializeGrid() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                grid[i][j] = new Cell();
+                grid[i][j] = new Cell(i, j);
             }
         }
     }
@@ -115,15 +115,15 @@ public class Island implements Runnable {
         int i = 0;
         for (Animal animal : animals) {
             animal.die();
-            if (i <= 5){
-                System.out.print("God killed: " + animal);
+            if (i <= 4){
+                System.out.print("God killed: " + animal + "|");
                 i++;
             } else {
                 System.out.print("\n");
                 i = 0;
             }
         }
-        System.out.println("God killed all " + this.plants.size() +  " plants.");
+        System.out.println("God killed all " + this.plants.size() +  " plants.|");
         for (Plant plant : plants){
             plant.die();
         }
@@ -137,6 +137,7 @@ public class Island implements Runnable {
                 grid[animal.getX_Coordinate()][animal.getY_Coordinate()].addIcon(animal.getIcon());
             }
         }
+        cleanUp();
     }
 
     public void allPerformActions() {
@@ -146,15 +147,13 @@ public class Island implements Runnable {
     }
 
     public void growAllPlants() {
-        System.out.println("Plants are growing...");
+        System.out.println("--".repeat(5)+"🌱"+"🌱"+"Plants are growing..."+"🌱"+"🌱"+ "--".repeat(5));
         Random random = new Random();
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if (grid[i][j].hasPlants()) {
                     Plant plant = getPlants().get(random.nextInt(grid[i][j].getPlants().size()));
                     grid[i][j].addPlant(plant);
-                    this.plants.add(plant);
-                    grid[i][j].addIcon(plant.getIcon());
                     Plant.plantCount.incrementAndGet();
                 }
             }
@@ -275,6 +274,14 @@ public class Island implements Runnable {
         for (int j = 0; j < plants; j++) {
             this.placePlant(this, new Plant(this));
         }
+    }
+
+    public Cell getCellByCoordinates(int x, int y){
+        if ((x < getRows() && y < getCols() && (x >= 0 && y >= 0))){
+            return grid[x][y];
+        }
+        System.out.println("There is no grid with those coordinates");
+        return null;
     }
 
     @Override

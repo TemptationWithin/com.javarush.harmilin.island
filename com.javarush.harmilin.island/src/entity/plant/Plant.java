@@ -35,11 +35,14 @@ public class Plant implements NotMovable {
         this.setWeight(0);
         this.getCurrentCell().getPlants().remove(this);
         this.getIsland().getPlants().remove(this);
+        if (this.getCurrentCell().getPlants().isEmpty()){
+            this.getCurrentCell().getPlantIcons().remove(this.icon);
+        }
         Plant.plantCount.decrementAndGet();
     }
 
     @Override
     public String toString() {
-        return this.getIcon() + ", weight: " + this.getWeight();
+        return this.getIcon();
     }
 }
