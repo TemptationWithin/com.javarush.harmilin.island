@@ -2,6 +2,7 @@ package entity.island;
 
 import entity.animal.Animal;
 import entity.animal.herbivore.*;
+import entity.animal.part.AnimalPart;
 import entity.animal.predator.*;
 import entity.island.weather.RainWeather;
 import entity.island.weather.SnowWeather;
@@ -22,6 +23,7 @@ public class Island implements Runnable {
     private final Cell[][] grid;
     private List<Animal> animals;
     private List<Plant> plants;
+    private List<AnimalPart> animalParts;
     private Weather currentWeather;
     @Getter
     private static final ConcurrentHashMap<String, Integer> animalLimits;
@@ -54,6 +56,7 @@ public class Island implements Runnable {
         this.rows = rows;
         this.cols = cols;
         this.grid = new Cell[rows][cols];
+        this.animalParts = new CopyOnWriteArrayList<>();
         this.animals = new CopyOnWriteArrayList<>();
         this.plants = new CopyOnWriteArrayList<>();
         initializeGrid();

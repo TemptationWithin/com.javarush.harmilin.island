@@ -1,6 +1,7 @@
 package entity.island;
 
 import entity.animal.Animal;
+import entity.animal.part.AnimalPart;
 import entity.plant.Plant;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ public class Cell {
     private final Set<String> plantIcons = new HashSet<>();
     private final List<Animal> animals = new CopyOnWriteArrayList<>();
     private final List<Plant> plants = new CopyOnWriteArrayList<>();
+    private final List<AnimalPart> animalParts = new CopyOnWriteArrayList<>();
     private static final Map<String, Integer> limits = Island.getAnimalLimits();
     private static final Map<String, Integer> plantLimits = Island.getPlantLimits();
     private int x_Coordinate, y_Coordinate;

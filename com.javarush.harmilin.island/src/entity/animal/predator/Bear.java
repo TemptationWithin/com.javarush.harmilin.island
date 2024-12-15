@@ -4,9 +4,11 @@ import entity.animal.Animal;
 import entity.animal.CanSleepAtWinter;
 import entity.animal.herbivore.*;
 import entity.island.Island;
+import lombok.Getter;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Getter
 public class Bear extends Predator implements CanSleepAtWinter {
     public static AtomicInteger bearCount = new AtomicInteger(0);
     private boolean isSleep;
@@ -27,17 +29,25 @@ public class Bear extends Predator implements CanSleepAtWinter {
         bearCount.incrementAndGet();
     }
 
+    public boolean isSleep() {
+        return isSleep;
+    }
+
     @Override
     public void sleep() {
-        isSleep = true;
-        System.out.println("💤💤💤"+ this + " went sleep in cell:" + this.coordinatesToString() + " 💤💤💤");
+        if (!isSleep()) {
+            isSleep = true;
+            System.out.println("💤💤💤"+ this + " went sleep in cell:" + this.coordinatesToString() + " 💤💤💤");
+        }
     }
 
     @Override
     public void awake() {
+        if (isSleep()){
+            this.setEnergy(100);
+            System.out.println("🌞🌞🌞 " + this + " awake after winter:" + this.coordinatesToString() + " 🌞🌞🌞");
+        }
         isSleep = false;
-        this.setEnergy(100);
-        System.out.println("🌞🌞🌞 " + this + " awake after winter:" + this.coordinatesToString() + " 🌞🌞🌞");
     }
 
     @Override

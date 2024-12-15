@@ -2,6 +2,8 @@ package entity.animal;
 
 import catalog.Names;
 import entity.animal.herbivore.Herbivore;
+import entity.animal.part.Bone;
+import entity.animal.part.Meat;
 import entity.animal.predator.Predator;
 import entity.island.Cell;
 import entity.island.Island;
@@ -20,8 +22,9 @@ public abstract class Animal {
 
     private final int maxSpeed;
     private int speed;
-    private final double maxWeight;
-    private final double foodRequired;
+    private double weight;
+    private double foodInStomach;
+    private final double maxFoodRequiredLimit;
     private int x_Coordinate, y_Coordinate;
     private int energy;
     private String icon;
@@ -34,11 +37,12 @@ public abstract class Animal {
 
     private final ConcurrentHashMap<Class<? extends Animal>, Integer> preyChances = new ConcurrentHashMap<>();
 
-    public Animal(Island island, double maxWeight, int maxSpeed, double foodRequired, int initialEnergy) {
+    public Animal(Island island, double maxWeight, int maxSpeed, double maxFoodRequiredLimit, int initialEnergy) {
         this.island = island;
-        this.maxWeight = maxWeight;
+        this.weight = maxWeight;
         this.maxSpeed = maxSpeed;
-        this.foodRequired = foodRequired;
+        this.maxFoodRequiredLimit = maxFoodRequiredLimit;
+        this.foodInStomach = maxFoodRequiredLimit;
         this.energy = initialEnergy;
         this.sex = new Random().nextBoolean() ? 'F' : 'M';
         if (sex == 'F') {
@@ -46,54 +50,66 @@ public abstract class Animal {
         } else this.name = Names.getRandomMaleName();
         animalCount.incrementAndGet();
     }
+
     protected abstract Animal createOffspring();
 
     protected synchronized void eat() {
-        this.eatAnimals(getCurrentCell());
-        this.decreaseEnergy(Math.min(0, getEnergy()-4));
-        this.eatPlants(getCurrentCell());
-        this.decreaseEnergy(Math.min(0, getEnergy()-2));
+        if (getEnergy() <= 70 && maxFoodRequiredLimit - foodInStomach > 0) {
+            isHungry = true;
+        }
+        if (isHungry) { //add animalpieces
+            this.eatAnimals(getCurrentCell());
+            this.eatPlants(getCurrentCell());
+        } else {
+            this.decreaseEnergy(Math.min(0, getEnergy() - 2));
+        }
     }
 
     protected synchronized void eatAnimals(Cell cell) {
         List<Animal> potentialPrey = cell.getAnimals();
         Random random = new Random();
-        if (getEnergy() <= 70) {
-            isHungry = true;
-        }
-            for (Animal prey : potentialPrey) {
-                if (prey == this) continue;
-                Integer chance = getPreyChances().get(prey.getClass());
-                if (chance != null && random.nextInt(100) < chance) {
-                    System.out.println(this + " successfully ate " + prey +
-                            " in cell: " + this.coordinatesToString());
-                    prey.die();
-                    increaseEnergy(Math.min(100, getEnergy() + 40));
+        for (Animal prey : potentialPrey) {
+            if (prey == this) continue;
+            Integer chance = getPreyChances().get(prey.getClass());
+            if (chance != null && random.nextInt(100) < chance) {
+                System.out.println(this + " successfully ate " + prey +
+                        " in cell: " + this.coordinatesToString());
+                //decreasing required food for this animal by weight of prey
+                double preyLoosingWeight = this.maxFoodRequiredLimit - this.foodInStomach;
+                this.foodInStomach = Math.max(this.maxFoodRequiredLimit, this.foodInStomach + prey.getWeight());
+                prey.setWeight(Math.min(0, prey.getWeight() - preyLoosingWeight));
+                prey.die();
+                increaseEnergy(Math.min(100, getEnergy() + 40)); // increasing energy after eating (+40 energy)
+                if (this.getMaxFoodRequiredLimit() == this.getFoodInStomach()) {
                     isHungry = false;
-                    return;
                 }
+                return;
             }
-        System.out.println(this + " found no prey to eat.");
+        }
+        System.out.println(this + " found no prey to eat in cell:" + this.coordinatesToString());
     }
 
     private synchronized void eatPlants(Cell cell) {
-            if (getEnergy() <= 70) {
-                isHungry = true;
-            }
-            if ((this instanceof Herbivore) && isHungry()) {
-                List<Plant> plants = cell.getPlants();
-                Random random = new Random();
-                if (!plants.isEmpty()) {
-                    int preyPlantIndex = random.nextInt(plants.size());
-                    System.out.println(this + " ate " + plants.get(preyPlantIndex).toString() +
-                            " in cell: " + this.coordinatesToString());
-                    plants.get(preyPlantIndex).die();
-                    increaseEnergy(Math.min(100, getEnergy() + 10));
+        if ((this instanceof Herbivore) && isHungry()) {
+            List<Plant> plants = cell.getPlants();
+            Random random = new Random();
+            if (!plants.isEmpty()) {
+                int preyPlantIndex = random.nextInt(plants.size());
+                System.out.println(this + " ate " + plants.get(preyPlantIndex).toString() +
+                        " in cell: " + this.coordinatesToString());
+                //decreasing required food for this animal by weight of prey
+                double preyLoosingWeight = this.maxFoodRequiredLimit - this.foodInStomach;
+                this.foodInStomach = Math.max(this.maxFoodRequiredLimit, this.foodInStomach + plants.get(preyPlantIndex).getWeight());
+                plants.get(preyPlantIndex).setWeight(Math.min(0, plants.get(preyPlantIndex).getWeight() - preyLoosingWeight));
+                plants.get(preyPlantIndex).die();
+                increaseEnergy(Math.min(100, getEnergy() + 10)); // increasing energy after eating (+10 energy)
+                if (this.getMaxFoodRequiredLimit() == this.getFoodInStomach()) {
                     isHungry = false;
-                } else {
-                    System.out.println(this + " found no plants in cell:" + this.coordinatesToString()) ;
                 }
+            } else {
+                System.out.println(this + " found no plants in cell:" + this.coordinatesToString());
             }
+        }
     }
 
     public synchronized void reproduce() {
@@ -110,14 +126,16 @@ public abstract class Animal {
                     Animal offspring = createOffspring();
                     if (offspring != null) {
                         cell.addAnimal(createOffspring());
-                        this.decreaseEnergy(Math.max(0, getEnergy()-10));
-                        partner.decreaseEnergy(Math.max(0, getEnergy()-10));
+                        this.decreaseEnergy(Math.max(0, getEnergy() - 10));// making animals get tired after activities (-10 energy)
+                        partner.decreaseEnergy(Math.max(0, getEnergy() - 10));
+                        this.setFoodInStomach(Math.min(0, getFoodInStomach() * 0.9)); // making animals be hungry after activities (10%)
+                        partner.setFoodInStomach(Math.min(0, getFoodInStomach() * 0.9));
                         System.out.println(this + " reproduced with " + partner + " in cell:" + this.coordinatesToString());
                     }
                     return;
                 }
             }
-            this.decreaseEnergy(Math.max(0, getEnergy()-5));
+            this.decreaseEnergy(Math.max(0, getEnergy() - 5));
             System.out.println(this + " found no partner to reproduce in cell:" + this.coordinatesToString());
         }
     }
@@ -134,6 +152,7 @@ public abstract class Animal {
         isAlive = false;
         this.setIcon("💀");
         this.getCurrentCell().addIcon("💀");
+        System.out.println(this.divisionIntoParts(this));
         island.getAnimals().remove(this);
         this.getCurrentCell().removeAnimal(this);
         animalCount.decrementAndGet();
@@ -145,7 +164,7 @@ public abstract class Animal {
     }
 
     public void performActions() {
-        if (this instanceof CanSleepAtWinter && getIsland().getCurrentWeather() instanceof SnowWeather){
+        if (this instanceof CanSleepAtWinter && getIsland().getCurrentWeather() instanceof SnowWeather) {
             return;
         }
         Random random = new Random();
@@ -153,9 +172,9 @@ public abstract class Animal {
         switch (action) {
             case 0 -> eat();
             case 1 -> {
-                if (!(this instanceof NotMovable)){
+                if (!(this instanceof NotMovable)) {
                     move(island.getRows(), island.getCols());
-                } else{
+                } else {
                     performActions();
                 }
             }
@@ -239,7 +258,7 @@ public abstract class Animal {
                 ". Energy: " + this.getEnergy() + " ";
     }
 
-    public String coordinatesToString(){
+    public String coordinatesToString() {
         return " [" + this.getX_Coordinate() + ", " + this.getY_Coordinate() + "] ";
     }
 
@@ -247,5 +266,17 @@ public abstract class Animal {
         this.currentCell = currentCell;
         this.x_Coordinate = currentCell.getX_Coordinate();
         this.y_Coordinate = currentCell.getY_Coordinate();
+    }
+
+    private String divisionIntoParts(Animal animal) {
+        if (animal.getWeight() > 0){
+            Bone bone = new Bone(animal);
+            Meat meat = new Meat(animal);
+            return animal + "split to the parts: " +
+                    bone.getIcon() + "(" + bone.getFoodAmount() + "), " +
+                    meat.getIcon() + "(" + meat.getFoodAmount() + ") " +
+                    " in cell:" + animal.coordinatesToString();
+        }
+        return "Nothing left after " + animal;
     }
 }

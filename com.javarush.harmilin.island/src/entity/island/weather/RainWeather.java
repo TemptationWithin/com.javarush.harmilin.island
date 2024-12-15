@@ -2,6 +2,7 @@ package entity.island.weather;
 
 import entity.animal.Animal;
 import entity.animal.CanFly;
+import entity.animal.CanSleepAtWinter;
 import entity.island.Island;
 import entity.plant.Plant;
 
@@ -15,11 +16,13 @@ public class RainWeather extends Weather{
 
     @Override
     public void affectAnimal(Animal animal) {
+        if (animal instanceof CanSleepAtWinter){
+            ((CanSleepAtWinter) animal).awake();
+        }
         if (animal instanceof CanFly){
             animal.setSpeed(0);
         } else {
             animal.setSpeed(Math.max(0, animal.getSpeed() + getMaxSpeedModifier()));
-
         }
     }
 

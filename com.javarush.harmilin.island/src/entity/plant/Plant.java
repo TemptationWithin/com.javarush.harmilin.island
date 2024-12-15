@@ -14,7 +14,7 @@ public class Plant implements NotMovable {
     private int x_Coordinate, y_Coordinate;
     private Cell currentCell;
     private String icon;
-    private int weight;
+    private double weight;
     Island island;
 
     public Plant(Island island) {
