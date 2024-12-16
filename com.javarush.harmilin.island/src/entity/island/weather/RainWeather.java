@@ -34,7 +34,7 @@ public class RainWeather extends Weather{
             Plant plant = new Plant(island);
             island.placePlant(island, plant);
             plant.getCurrentCell().addPlant(plant);
-            plant.getCurrentCell().addIcon(plant.getIcon());
+            plant.getCurrentCell().updateIcons();
             Plant.plantCount.incrementAndGet();
         }
         System.out.println("Rain stops." + count + " plants appearing.");

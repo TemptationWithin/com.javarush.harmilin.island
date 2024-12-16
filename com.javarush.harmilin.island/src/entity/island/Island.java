@@ -77,7 +77,7 @@ public class Island implements Runnable {
         island.animals.add(animal);
         animal.setCurrentCell(grid[animal.getX_Coordinate()][animal.getY_Coordinate()]);
         animal.getCurrentCell().addAnimal(animal);
-        animal.getCurrentCell().addIcon(animal.getIcon());
+        animal.getCurrentCell().updateIcons();
     }
 
     public void placePlant(Island island, Plant plant) {
@@ -87,7 +87,7 @@ public class Island implements Runnable {
         island.plants.add(plant);
         plant.setCurrentCell(grid[plant.getX_Coordinate()][plant.getY_Coordinate()]);
         plant.getCurrentCell().addPlant(plant);
-        plant.getCurrentCell().addIcon(plant.getIcon());
+        plant.getCurrentCell().updateIcons();
     }
 
     private int calculateMaxCellWidth() {
@@ -142,7 +142,7 @@ public class Island implements Runnable {
         for (Animal animal : animals) {
             if (animal.isAlive()) {
                 animal.move(animal.getIsland().getRows(), animal.getIsland().getCols());
-                grid[animal.getX_Coordinate()][animal.getY_Coordinate()].addIcon(animal.getIcon());
+                grid[animal.getX_Coordinate()][animal.getY_Coordinate()].updateIcons();
             }
         }
         cleanUp();
@@ -193,10 +193,10 @@ public class Island implements Runnable {
         }
     }
 
-    public void cleanUp() {
+    public synchronized void cleanUp() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                grid[i][j].removeDeadIcons();
+                grid[i][j].updateIcons();
             }
         }
     }
@@ -304,10 +304,10 @@ public class Island implements Runnable {
         return null;
     }
 
-    public void changeWeather(){
+    public void changeWeather() {
         Random random = new Random();
         int weatherType = random.nextInt(11);
-        switch (weatherType){
+        switch (weatherType) {
             case 0, 1, 2, 3, 4, 5, 6, 7 -> currentWeather = new SunnyWeather();
             case 8, 9 -> currentWeather = new RainWeather();
             case 10 -> currentWeather = new SnowWeather();
@@ -316,10 +316,10 @@ public class Island implements Runnable {
         applyWeatherEffects();
     }
 
-    public void applyWeatherEffects(){
+    public void applyWeatherEffects() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                for (Animal animal : grid[i][j].getAnimals()){
+                for (Animal animal : grid[i][j].getAnimals()) {
                     currentWeather.affectAnimal(animal);
                 }
             }

@@ -2,6 +2,7 @@ package entity.animal;
 
 import catalog.Names;
 import entity.animal.herbivore.Herbivore;
+import entity.animal.part.AnimalPart;
 import entity.animal.part.Bone;
 import entity.animal.part.Meat;
 import entity.animal.predator.Predator;
@@ -13,6 +14,7 @@ import lombok.Data;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -54,14 +56,20 @@ public abstract class Animal {
     protected abstract Animal createOffspring();
 
     protected synchronized void eat() {
+        Random random = new Random();
         if (getEnergy() <= 70 && maxFoodRequiredLimit - foodInStomach > 0) {
             isHungry = true;
         }
-        if (isHungry) { //add animalpieces
-            this.eatAnimals(getCurrentCell());
-            this.eatPlants(getCurrentCell());
-        } else {
-            this.decreaseEnergy(Math.min(0, getEnergy() - 2));
+        Set<String> currentIcons = currentCell.getAnimalIcons();
+        currentIcons.remove(this.icon);
+        if (!currentIcons.isEmpty()) {
+            for (int i = 0; i < random.nextInt(2) + 1; i++) {
+                if (isHungry) {
+                    this.eatAnimalPieces(getCurrentCell());
+                    this.eatAnimals(getCurrentCell());
+                    this.eatPlants(getCurrentCell());
+                }
+            }
         }
     }
 
@@ -75,8 +83,8 @@ public abstract class Animal {
                 System.out.println(this + " successfully ate " + prey +
                         " in cell: " + this.coordinatesToString());
                 //decreasing required food for this animal by weight of prey
-                double preyLoosingWeight = this.maxFoodRequiredLimit - this.foodInStomach;
-                this.foodInStomach = Math.max(this.maxFoodRequiredLimit, this.foodInStomach + prey.getWeight());
+                double preyLoosingWeight = Math.min(prey.getWeight(), this.maxFoodRequiredLimit - this.foodInStomach);
+                this.setFoodInStomach(Math.min(this.maxFoodRequiredLimit, this.foodInStomach + prey.getWeight()));
                 prey.setWeight(Math.min(0, prey.getWeight() - preyLoosingWeight));
                 prey.die();
                 increaseEnergy(Math.min(100, getEnergy() + 40)); // increasing energy after eating (+40 energy)
@@ -89,6 +97,27 @@ public abstract class Animal {
         System.out.println(this + " found no prey to eat in cell:" + this.coordinatesToString());
     }
 
+    protected synchronized void eatAnimalPieces(Cell cell) {
+        List<AnimalPart> animalParts = cell.getAnimalParts();
+        if (animalParts.isEmpty() || !(this instanceof Predator)) {
+            return;
+        }
+        for (AnimalPart animalPart : animalParts) {
+            double partLoosingWeight = Math.min(animalPart.getFoodAmount(), this.getMaxFoodRequiredLimit() - this.foodInStomach);
+            this.setFoodInStomach(Math.min(this.maxFoodRequiredLimit, this.foodInStomach + animalPart.getFoodAmount()));
+            animalPart.setFoodAmount(Math.min(0, animalPart.getFoodAmount() - partLoosingWeight));
+            increaseEnergy(this.getEnergy() + 20);// increasing energy after eating (+20 energy)
+            if (animalPart.getFoodAmount() <= 0) {
+                animalPart.erase();
+            }
+            if (this.getMaxFoodRequiredLimit() == this.getFoodInStomach()) {
+                isHungry = false;
+            }
+            return;
+        }
+        System.out.println(this + " found no nothing to eat in cell:" + this.coordinatesToString());
+    }
+
     private synchronized void eatPlants(Cell cell) {
         if ((this instanceof Herbivore) && isHungry()) {
             List<Plant> plants = cell.getPlants();
@@ -99,8 +128,8 @@ public abstract class Animal {
                         " in cell: " + this.coordinatesToString());
                 //decreasing required food for this animal by weight of prey
                 double preyLoosingWeight = this.maxFoodRequiredLimit - this.foodInStomach;
-                this.foodInStomach = Math.max(this.maxFoodRequiredLimit, this.foodInStomach + plants.get(preyPlantIndex).getWeight());
-                plants.get(preyPlantIndex).setWeight(Math.min(0, plants.get(preyPlantIndex).getWeight() - preyLoosingWeight));
+                this.foodInStomach = Math.min(this.maxFoodRequiredLimit, this.foodInStomach + plants.get(preyPlantIndex).getWeight());
+                plants.get(preyPlantIndex).setWeight(Math.max(0, plants.get(preyPlantIndex).getWeight() - preyLoosingWeight));
                 plants.get(preyPlantIndex).die();
                 increaseEnergy(Math.min(100, getEnergy() + 10)); // increasing energy after eating (+10 energy)
                 if (this.getMaxFoodRequiredLimit() == this.getFoodInStomach()) {
@@ -114,29 +143,47 @@ public abstract class Animal {
 
     public synchronized void reproduce() {
         Cell cell = getCurrentCell();
+        Animal offspring = null;
+        int partnerIndex = -1;
         synchronized (cell) {
-            List<Animal> animalsInCell = cell.getAnimals();
-            for (Animal partner : animalsInCell) {
+            for (Animal partner : cell.getAnimals()) {
                 if (partner != this
                         && partner.getClass() == this.getClass()
                         && partner.getSex() != this.getSex()
                         && partner.isAlive()
                         && this.getEnergy() > 10
                         && partner.getEnergy() > 10) {
-                    Animal offspring = createOffspring();
-                    if (offspring != null) {
-                        cell.addAnimal(createOffspring());
-                        this.decreaseEnergy(Math.max(0, getEnergy() - 10));// making animals get tired after activities (-10 energy)
-                        partner.decreaseEnergy(Math.max(0, getEnergy() - 10));
-                        this.setFoodInStomach(Math.min(0, getFoodInStomach() * 0.9)); // making animals be hungry after activities (10%)
-                        partner.setFoodInStomach(Math.min(0, getFoodInStomach() * 0.9));
-                        System.out.println(this + " reproduced with " + partner + " in cell:" + this.coordinatesToString());
-                    }
-                    return;
+                    partnerIndex = cell.getAnimals().indexOf(partner);
+                    offspring = createOffspring();
+                    break;
                 }
             }
-            this.decreaseEnergy(Math.max(0, getEnergy() - 5));
-            System.out.println(this + " found no partner to reproduce in cell:" + this.coordinatesToString());
+            if (offspring != null && partnerIndex > -1) {
+                cell.addAnimal(offspring);
+                this.setEnergy(Math.max(0, this.getEnergy() - 10));// making animals get tired after activities (-10 energy)
+                cell.getAnimals().get(partnerIndex).setEnergy(Math.max(0, cell.getAnimals().get(partnerIndex).getEnergy() - 10));
+
+                System.out.println(this.getEnergy() +" ENERGY OF THIS");
+                System.out.println(cell.getAnimals().get(partnerIndex).getEnergy() +" ENERGY OF PARTNER");
+
+                this.setFoodInStomach(Math.max(0, getFoodInStomach() * 0.9)); // making animals be hungry after activities (10%)
+                cell.getAnimals().get(partnerIndex).setFoodInStomach(Math.max(0, getFoodInStomach() * 0.9));
+
+                System.out.println(this.getFoodInStomach() +" food inside OF THIS");
+                System.out.println(cell.getAnimals().get(partnerIndex).getFoodInStomach() +" FOOD OF PARTNER");
+
+                if (this.getEnergy() == 0) {
+                    this.die();
+                }
+                if (cell.getAnimals().get(partnerIndex).getEnergy() == 0) {
+                    cell.getAnimals().get(partnerIndex).die();
+                }
+                System.out.println(this + " reproduced with "
+                        + cell.getAnimals().get(partnerIndex) + " in cell:"
+                        + this.coordinatesToString() + ". Baby is: " + offspring);
+            } else {
+                System.out.println(this + " found no partner to reproduce in cell:" + this.coordinatesToString());
+            }
         }
     }
 
@@ -151,7 +198,7 @@ public abstract class Animal {
     public void die() {
         isAlive = false;
         this.setIcon("💀");
-        this.getCurrentCell().addIcon("💀");
+        this.getCurrentCell().updateIcons();
         System.out.println(this.divisionIntoParts(this));
         island.getAnimals().remove(this);
         this.getCurrentCell().removeAnimal(this);
@@ -183,7 +230,7 @@ public abstract class Animal {
     }
 
     public void increaseEnergy(int amount) {
-        energy = energy + amount;
+        energy = Math.min(100, energy + amount);
     }
 
     public void decreaseEnergy(int amount) {
@@ -230,15 +277,16 @@ public abstract class Animal {
                 System.out.println(this + " cannot move out of bounds.");
                 return;
             }
-            this.decreaseEnergy(getSpeed() * 2);
+            this.decreaseEnergy(5); // decreasing energy by 2
             if (this.getEnergy() <= 0) {
                 this.die();
                 System.out.println(this + "died of exhaustion >>" + "💀");
             } else {
                 this.getCurrentCell().removeAnimal(this);
-                this.setCurrentCell(island.getCellByCoordinates(x_Coordinate, y_Coordinate));
+                this.setCurrentCell(island.getCellByCoordinates(newX, newY));
                 this.getCurrentCell().getAnimals().add(this);
-                this.getCurrentCell().addIcon(this.getIcon());
+                island.getCellByCoordinates(oldX, oldY).updateIcons();
+                island.getCellByCoordinates(newX, newY).updateIcons();
                 island.cleanUp();
                 System.out.println(this + " with max speed: " + this.getMaxSpeed() +
                         " moved " + dir + ", from " + "[" + oldX + ", " + oldY + "]" +
@@ -269,13 +317,12 @@ public abstract class Animal {
     }
 
     private String divisionIntoParts(Animal animal) {
-        if (animal.getWeight() > 0){
-            System.out.println(animal.getWeight());
+        if (animal.getWeight() > 0) {
             Bone bone = new Bone(animal);
             Meat meat = new Meat(animal);
             return animal + "split to the parts: " +
-                    bone.getIcon() + "(" + bone.getBoneAmount() + "), " +
-                    meat.getIcon() + "(" + meat.getMeatAmount() + ") " +
+                    bone.getIcon() + "(" + bone.getFoodAmount() + "), " +
+                    meat.getIcon() + "(" + meat.getFoodAmount() + ") " +
                     " in cell:" + animal.coordinatesToString();
         }
         return "Nothing left after " + animal;

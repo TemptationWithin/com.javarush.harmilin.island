@@ -5,8 +5,11 @@ import entity.island.Cell;
 import entity.island.Island;
 import lombok.Data;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Data
 public abstract class AnimalPart {
+    public static AtomicInteger animalPartsCount = new AtomicInteger(0);
 
     private double foodAmount;
     private Cell currentCell;
@@ -16,13 +19,13 @@ public abstract class AnimalPart {
     private Animal animal;
 
     public AnimalPart(Animal animal) {
-            this.foodAmount = animal.getWeight();
-            this.island = animal.getIsland();
-            this.animal = animal;
-            this.setCurrentCell(animal.getCurrentCell());
-            this.getCurrentCell().addIcon(this.getIcon());
-            this.getCurrentCell().getAnimalParts().add(this);
-            island.getAnimalParts().add(this);
+        this.island = animal.getIsland();
+        this.animal = animal;
+        this.setCurrentCell(animal.getCurrentCell());
+        this.getCurrentCell().updateIcons();
+        this.getCurrentCell().getAnimalParts().add(this);
+        island.getAnimalParts().add(this);
+        animalPartsCount.incrementAndGet();
     }
 
     public void setCurrentCell(Cell currentCell) {
@@ -36,5 +39,17 @@ public abstract class AnimalPart {
         return this.getIcon() + "(" + this.getClass().getSimpleName() + " of " + animal + ")" +
                 " laying at cell: "
                 + this.animal.coordinatesToString();
+    }
+
+    public void erase() {
+        if (this instanceof Meat) {
+            Meat.animalMeatCount.decrementAndGet();
+        }
+        if (this instanceof Bone) {
+            Bone.animalBonesCount.decrementAndGet();
+        }
+        this.getCurrentCell().getAnimalParts().remove(this);
+        AnimalPart.animalPartsCount.decrementAndGet();
+        this.getCurrentCell().updateIcons();
     }
 }

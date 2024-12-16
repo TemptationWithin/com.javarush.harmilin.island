@@ -31,6 +31,7 @@ public class Cell {
             this.animals.add(animal);
             animal.setCurrentCell(this);
             animal.getIsland().getAnimals().add(animal);
+            animal.getCurrentCell().updateIcons();
         } else {
             System.out.println("Cell is full for " + animal.getClass().getSimpleName());
         }
@@ -42,8 +43,8 @@ public class Cell {
         if (count <= maxCount) {
             this.plants.add(plant);
             plant.setCurrentCell(this);
-            plant.getCurrentCell().addIcon(plant.getIcon());
             plant.getIsland().getPlants().add(plant);
+            plant.getCurrentCell().updateIcons();
         } else {
             System.out.println("Cell is full for " + plant.getClass().getSimpleName());
         }
@@ -61,16 +62,18 @@ public class Cell {
         return plantLimits.get(plantClass.getSimpleName());
     }
 
-    public void addIcon(String icon) {
-        synchronized (animalIcons) {
-            if (animalIcons.size() < 3) {
-                animalIcons.add(icon);
-            }
+    public synchronized void updateIcons() {
+        animalIcons.clear();
+        plantIcons.clear();
+        for (Animal animal : animals) {
+            animalIcons.add(animal.getIcon());
         }
-        synchronized (plantIcons) {
-            if (plantIcons.size() < 2) {
-                plantIcons.add(icon);
-            }
+        for (Plant plant : plants) {
+            plantIcons.add(plant.getIcon());
+        }
+
+        for (AnimalPart animalPart : animalParts) {
+            animalIcons.add(animalPart.getIcon());
         }
     }
 
@@ -134,15 +137,18 @@ public class Cell {
             if (!plants.isEmpty()) {
                 plants.parallelStream().forEach(s -> System.out.print(s.toString() + ", "));
             }
+            if (!animalParts.isEmpty()) {
+                animalParts.parallelStream().forEach(s -> System.out.print(s.toString() + ", "));
+            }
             System.out.println("\n" + "---".repeat(100));
         } else {
             System.out.print(" is empty.");
-            System.out.print("\n" + "---".repeat(100) +"\n");
+            System.out.print("\n" + "---".repeat(100) + "\n");
         }
     }
 
 
     private boolean cellIsEmpty() {
-        return animals.isEmpty() && plants.isEmpty();
+        return animals.isEmpty() && plants.isEmpty() && animalParts.isEmpty();
     }
 }

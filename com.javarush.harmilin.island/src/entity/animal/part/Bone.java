@@ -3,18 +3,18 @@ package entity.animal.part;
 import entity.animal.Animal;
 import lombok.Getter;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class Bone extends AnimalPart {
+    public static AtomicInteger animalBonesCount = new AtomicInteger(0);
     @Getter
     private double foodAmount;
-    @Getter
-    private double boneAmount;
-    private String icon;
 
     public Bone(Animal animal) {
         super(animal);
-        this.foodAmount = animal.getWeight();
-        this.boneAmount = foodAmount * 0.3;  //30% bones
+        this.foodAmount = animal.getWeight() * 0.3;  //30% bones
+        animalBonesCount.incrementAndGet();
     }
 
     public String getIcon() {
