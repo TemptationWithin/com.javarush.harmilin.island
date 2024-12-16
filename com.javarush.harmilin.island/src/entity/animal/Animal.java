@@ -270,11 +270,12 @@ public abstract class Animal {
 
     private String divisionIntoParts(Animal animal) {
         if (animal.getWeight() > 0){
+            System.out.println(animal.getWeight());
             Bone bone = new Bone(animal);
             Meat meat = new Meat(animal);
             return animal + "split to the parts: " +
-                    bone.getIcon() + "(" + bone.getFoodAmount() + "), " +
-                    meat.getIcon() + "(" + meat.getFoodAmount() + ") " +
+                    bone.getIcon() + "(" + bone.getBoneAmount() + "), " +
+                    meat.getIcon() + "(" + meat.getMeatAmount() + ") " +
                     " in cell:" + animal.coordinatesToString();
         }
         return "Nothing left after " + animal;

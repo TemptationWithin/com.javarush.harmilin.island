@@ -16,6 +16,7 @@ public abstract class AnimalPart {
     private Animal animal;
 
     public AnimalPart(Animal animal) {
+            this.foodAmount = animal.getWeight();
             this.island = animal.getIsland();
             this.animal = animal;
             this.setCurrentCell(animal.getCurrentCell());

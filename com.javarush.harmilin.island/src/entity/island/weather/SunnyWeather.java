@@ -30,7 +30,7 @@ public class SunnyWeather extends Weather{
 
     @Override
     public String toString() {
-        return "\n" + "--".repeat(5) + "🌞🌞🌞 " + "Sun came out from the clouds.."+ "--------==---🌞🌞🌞" + "--".repeat(5) +"\n" +
+        return "\n" + "--".repeat(5) + "🌞🌞🌞 " + "Sun came out from the clouds.."+ "-------------🌞🌞🌞" + "--".repeat(5) +"\n" +
                 "--".repeat(5) + "🌞🌞🌞 "+ "All animals have regular characteristics! " + "🌞🌞🌞" + "--".repeat(5) ;
     }
 }
