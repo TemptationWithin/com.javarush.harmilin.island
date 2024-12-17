@@ -51,5 +51,6 @@ public abstract class AnimalPart {
         this.getCurrentCell().getAnimalParts().remove(this);
         AnimalPart.animalPartsCount.decrementAndGet();
         this.getCurrentCell().updateIcons();
+        this.getIsland().getAnimalParts().remove(this);
     }
 }

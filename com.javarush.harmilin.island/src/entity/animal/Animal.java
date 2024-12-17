@@ -68,6 +68,7 @@ public abstract class Animal {
                     this.eatAnimalPieces(getCurrentCell());
                     this.eatAnimals(getCurrentCell());
                     this.eatPlants(getCurrentCell());
+                    this.setFoodInStomach(Math.max(0, getFoodInStomach() * 0.9)); // making animals be hungry after activities (10%)
                 }
             }
         }
@@ -80,8 +81,8 @@ public abstract class Animal {
             if (prey == this) continue;
             Integer chance = getPreyChances().get(prey.getClass());
             if (chance != null && random.nextInt(100) < chance) {
-                System.out.println(this + " successfully ate " + prey +
-                        " in cell: " + this.coordinatesToString());
+                System.out.println(this + " successfully ate " + "🩸🩸🩸" + prey +
+                        " in cell: " + this.coordinatesToString() + " 🩸🩸🩸" );
                 //decreasing required food for this animal by weight of prey
                 double preyLoosingWeight = Math.min(prey.getWeight(), this.maxFoodRequiredLimit - this.foodInStomach);
                 this.setFoodInStomach(Math.min(this.maxFoodRequiredLimit, this.foodInStomach + prey.getWeight()));
@@ -107,6 +108,8 @@ public abstract class Animal {
             this.setFoodInStomach(Math.min(this.maxFoodRequiredLimit, this.foodInStomach + animalPart.getFoodAmount()));
             animalPart.setFoodAmount(Math.min(0, animalPart.getFoodAmount() - partLoosingWeight));
             increaseEnergy(this.getEnergy() + 20);// increasing energy after eating (+20 energy)
+            System.out.println(this + " successfully ate " + "🩸" + animalPart +
+                    " in cell: " + this.coordinatesToString() + " 🩸" );
             if (animalPart.getFoodAmount() <= 0) {
                 animalPart.erase();
             }
@@ -162,16 +165,8 @@ public abstract class Animal {
                 cell.addAnimal(offspring);
                 this.setEnergy(Math.max(0, this.getEnergy() - 10));// making animals get tired after activities (-10 energy)
                 cell.getAnimals().get(partnerIndex).setEnergy(Math.max(0, cell.getAnimals().get(partnerIndex).getEnergy() - 10));
-
-                System.out.println(this.getEnergy() +" ENERGY OF THIS");
-                System.out.println(cell.getAnimals().get(partnerIndex).getEnergy() +" ENERGY OF PARTNER");
-
                 this.setFoodInStomach(Math.max(0, getFoodInStomach() * 0.9)); // making animals be hungry after activities (10%)
                 cell.getAnimals().get(partnerIndex).setFoodInStomach(Math.max(0, getFoodInStomach() * 0.9));
-
-                System.out.println(this.getFoodInStomach() +" food inside OF THIS");
-                System.out.println(cell.getAnimals().get(partnerIndex).getFoodInStomach() +" FOOD OF PARTNER");
-
                 if (this.getEnergy() == 0) {
                     this.die();
                 }
@@ -199,7 +194,7 @@ public abstract class Animal {
         isAlive = false;
         this.setIcon("💀");
         this.getCurrentCell().updateIcons();
-        System.out.println(this.divisionIntoParts(this));
+        System.out.println(this.divisionIntoParts(this)); //animals breaks into animalParts
         island.getAnimals().remove(this);
         this.getCurrentCell().removeAnimal(this);
         animalCount.decrementAndGet();
@@ -325,6 +320,6 @@ public abstract class Animal {
                     meat.getIcon() + "(" + meat.getFoodAmount() + ") " +
                     " in cell:" + animal.coordinatesToString();
         }
-        return "Nothing left after " + animal;
+        return "👻 "+"Nothing left after " + animal + "👻";
     }
 }
