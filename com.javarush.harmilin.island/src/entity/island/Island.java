@@ -312,7 +312,6 @@ public class Island implements Runnable {
             case 8, 9 -> currentWeather = new RainWeather();
             case 10 -> currentWeather = new SnowWeather();
         }
-        System.out.println(currentWeather);
         applyWeatherEffects();
     }
 

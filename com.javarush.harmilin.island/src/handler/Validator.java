@@ -24,6 +24,23 @@ public class Validator {
         }
     }
 
+    public static int getValidatedFrequencyInput(Scanner scanner, String message, int lastDay){
+        int dayLimit;
+        System.out.println(message);
+        while (true){
+            if (scanner.hasNextInt()){
+                dayLimit = scanner.nextInt();
+                if (dayLimit > 0 && dayLimit <= lastDay){
+                    return dayLimit;
+                } else {
+                    System.out.println("Please, enter int > 0 but < last day: ");
+                }
+            } else {
+                System.out.println("Please, enter int > 0 but < last day: ");
+                scanner.next();
+            }
+        }
+    }
     public static int getValidatedIntLimitInput(Scanner scanner, String message){
         int dayLimit;
         while (true){

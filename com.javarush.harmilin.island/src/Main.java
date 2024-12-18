@@ -1,41 +1,46 @@
+import handler.TextInfo;
 import entity.island.Island;
 import handler.ExecutorHandler;
 import handler.Timer;
 import handler.Validator;
 
+import java.io.Console;
 import java.util.Scanner;
 import java.util.concurrent.*;
 
 public class Main {
     public static void main(String[] args) {
-        Scanner console = new Scanner(System.in);
-        ExecutorHandler executorHandler = new ExecutorHandler();
+        TextInfo.greeting();
 
-        System.out.println("Welcome to Island. Lets customize your island.\nPlease, enter size of island (AxB):");
-        int width = Validator.getValidatedSizeInput(console, "Please, select width of island: ");
-        int length = Validator.getValidatedSizeInput(console, "Please, select length of island: ");
-        int dayLimitation = Validator.getValidatedIntLimitInput(console, "Please, let us know how many days you would like to observe: ");
-        int startAnimals = Validator.getValidatedIntLimitInput(console, "Please, let us know how many animals you want to place?\n" +
-                "Animal types will be chosen randomly but we will apply correct proportion of predators and herbivores: ");
-        int startPlants = Validator.getValidatedIntLimitInput(console, "Please, let us know how many plants you want to place?: ");
+        Scanner console = new Scanner(System.in);
+
+        int width = Validator.getValidatedSizeInput(console, TextInfo.wightRequest);
+        int length = Validator.getValidatedSizeInput(console, TextInfo.lengthRequest);
+        int dayLimitation = Validator.getValidatedIntLimitInput(console, TextInfo.dayLimitRequest);
+        int startAnimals = Validator.getValidatedIntLimitInput(console, TextInfo.animalsAmountRequest);
+        int startPlants = Validator.getValidatedIntLimitInput(console, TextInfo.plantsAmountRequest);
+        int displayFrequency = Validator.getValidatedFrequencyInput(console, TextInfo.howOftenDisplay, dayLimitation);
+
         Island island = new Island(width, length);
         island.randomBegin(startAnimals, startPlants);
-        System.out.println("Thanks. Your settings are: ");
+
+        System.out.println(TextInfo.enteredSettingsAre);
         System.out.println(island);
+
         Timer.sleep(1000);
-        System.out.println("Welcome to hungry games. Lets start...");
-        //Timer.funnyPreparing();
+        System.out.println(TextInfo.funnyCue);
+        Timer.funnyPreparing();
         Timer.sleep(500);
-        island.changeWeather();
+
+        ExecutorHandler executorHandler = new ExecutorHandler();
+
         int day = 0;
         island.display();
 
         while (day < dayLimitation) {
-            synchronized (System.out){
+            synchronized (System.out) {
                 island.changeWeather();
-                System.out.println("+" + "---".repeat(2) + " +");
-                System.out.println("|DAY #" + day + " |");
-                System.out.println("+" + "___".repeat(2) + " +");
+                TextInfo.announcementOfTheDay(day, island.getCurrentWeather());
             }
             Timer.sleep(2000);
             executorHandler.getExecutorService().submit(island::cleanUp);
@@ -43,15 +48,22 @@ public class Main {
             executorHandler.getScheduler().scheduleWithFixedDelay(island::growAllPlants, 0, 20, TimeUnit.SECONDS);
             //executorHandler.getScheduler().scheduleWithFixedDelay(island::moveAllAnimals, 0, 10, TimeUnit.SECONDS);
             Timer.sleep(100);
+
             day++;
 
             if (day == dayLimitation) {
                 executorHandler.shutdownAllExecutors();
-                Timer.sleep(5000);
+                Timer.sleep(2000);
                 island.display();
                 dayLimitation = dayLimitation + Validator.optionsForContinue(console, island);
                 executorHandler.restartExecutors();
+            } else if (day % displayFrequency == 0){
+                executorHandler.shutdownAllExecutors();
+                Timer.sleep(2000);
+                island.display();
+                executorHandler.restartExecutors();
             }
+
         }
 
         System.out.println("Last day #" + dayLimitation + " ended.");
@@ -60,8 +72,9 @@ public class Main {
         island.stopSimulation();
         executorHandler.shutdownAllExecutors();
         console.close();
-        System.out.println("Simulation stopped.");
+        System.out.println(TextInfo.simulationEnded);
 
         Timer.sleep(1000);
     }
+
 }
